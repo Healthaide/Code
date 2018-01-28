@@ -1,0 +1,88 @@
+package cn.domain.hello.bean;
+
+public class ArticleBean
+{
+	private int id;
+	private String name;
+	private String source;
+	private String date;
+	private String kind;
+	private String article;
+	private int click;
+	public ArticleBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public ArticleBean(int id, String name, String source, String date,
+			String kind, String article, int click)
+	{
+		super();
+		this.id = id;
+		this.name = name;
+		this.source = source;
+		this.date = date;
+		this.kind = kind;
+		this.article = article;
+		this.click = click;
+	}
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	public String getName()
+	{
+		return name;
+	}
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	public String getSource()
+	{
+		return source;
+	}
+	public void setSource(String source)
+	{
+		this.source = source;
+	}
+	public String getDate()
+	{
+		return date;
+	}
+	public void setDate(String date)
+	{
+		this.date = date;
+	}
+	public String getKind()
+	{
+		return kind;
+	}
+	public void setKind(String kind)
+	{
+		this.kind = kind;
+	}
+	public String getArticle()
+	{
+		return article;
+	}
+	public void setArticle(String article)
+	{
+		this.article = article;
+	}
+	public int getClick()
+	{
+		return click;
+	}
+	public void setClick(int click)
+	{
+		this.click = click;
+	}
+	
+	
+
+}
