@@ -22,7 +22,7 @@ import com.cooper.healthyaide.R;
  */
 
 public class Login extends Activity implements View.OnClickListener{
-    private String TAG = "ZSX";
+    
     private TextView tv_register;//转到注册
     private TextView tv_forget_password;//忘记密码
 

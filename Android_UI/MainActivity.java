@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     //定义数组来存放按钮资源文件名
     private int mImageViewArray[]={R.drawable.tab_home_btn,R.drawable.tab_find_btn,R.drawable.tab_user_btn};
     //定义Tab选项卡的文字
-    private String mTextViewArray[]= {"首页","医院","我"};
+    private String mTextViewArray[]= {"Home","Department","Me"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,41 +44,6 @@ public class MainActivity extends AppCompatActivity {
         }
         //initView();
     }
-
-    /**private void initView() {
-        //实例化布局对象
-        layoutInflater = LayoutInflater.from(this);
-        //实例化TabHost对象,得到TabHost
-        mTabHost = (FragmentTabHost) findViewById(R.id.tab_host);
-        //mTabHost.setup(this, getSupportFragmentManager(), R.id.frag_content);
-
-        //得到fragment的个数
-        int count = fragmentArray.length;
-
-        for (int i = 0; i < count; i++) {
-            //为每一个Tab按钮设置图标、文字和内容
-            TabHost.TabSpec tabSpec = mTabHost.newTabSpec(mTextViewArray[i]).setIndicator(getTabItemView(i));
-
-            //将Tab按钮添加进Tab选项卡中
-            mTabHost.addTab(tabSpec, fragmentArray[i], null);
-//            //设置Tab按钮的背景
-//            mTabHost.getTabWidget().getChildAt(i).setBackgroundResource();
-        }
-
-    }*/
-
-    /*private View getTabItemView(int i) {
-        View view = layoutInflater.inflate(R.layout.item_tab_view, null);
-
-        ImageView imageView = (ImageView) view.findViewById(R.id.iv_tab);
-        imageView.setImageResource(mImageViewArray[i]);
-
-        TextView textView = (TextView) view.findViewById(R.id.tv_tab);
-        textView.setText(mTextViewArray[i]);
-
-        return view;
-
-    }*/
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
