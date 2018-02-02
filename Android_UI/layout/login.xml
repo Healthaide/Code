@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/toolbar_color">
+
+    <android.support.v7.widget.Toolbar
+        style="@style/Toolbar"
+        app:contentInsetStart="0dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                style="@style/TextView.ToolBar_Title"
+                android:text="User Login"
+                android:id="@+id/toolbar_title"
+                />
+        </RelativeLayout>
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="#fff">
+
+        <LinearLayout
+            style="@style/LinearLayout.Layout_one">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/user"/>
+            <LinearLayout
+                style="@style/LinearLayout.Layout_Second">
+                <EditText
+                    android:id="@+id/et_input_username"
+                    style="@style/EditView.Register_Input"
+                    android:hint="Please enter account"
+                    android:inputType="number" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            style="@style/LinearLayout.Layout_one">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/password"/>
+            <LinearLayout
+                style="@style/LinearLayout.Layout_Second">
+                <EditText
+                    android:id="@+id/et_input_password"
+                    style="@style/EditView.Register_Input"
+                    android:hint="Please enter password"
+                    android:inputType="textPassword" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+            <Button
+                android:id="@+id/btn_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/btn_login"
+                android:text="Log In"
+                android:textSize="20sp"
+                android:textColor="@color/btn_register_text_color" />
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="35dp"
+            android:layout_marginRight="35dp"
+            android:layout_marginTop="40dp">
+            <TextView
+                android:id="@+id/tv_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Quick Register"
+                android:textColor="#797979"/>
+            <TextView
+                android:id="@+id/tv_forget_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Find Password"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="right"
+                android:textColor="#797979"/>
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>
