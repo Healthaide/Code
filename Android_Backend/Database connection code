@@ -1,0 +1,113 @@
+package cn.domain.hello.config;
+
+public class Config
+{
+
+	public static final String dbServerIp = "localhost";// 锟斤拷菘锟斤拷锟斤拷锟斤拷IP
+	public static final String dbUser = "root";// 锟斤拷菘锟斤拷没锟斤拷锟�
+	public static final String dbPwd = "root";// 锟斤拷菘锟斤拷锟斤拷锟�
+	public static final String dbPort = "3306";// 锟斤拷菘锟剿口猴拷
+	public static final String dbName = "world";// 锟斤拷菘锟斤拷锟�
+	public static final String dbEncoding = "UTF-8";// 锟斤拷菘锟斤拷锟斤拷
+}
+package cn.domain.hello.dao;
+
+import java.sql.Connection;
+import cn.domain.hello.config.Config;
+
+public abstract class BaseDao
+{
+
+	public Connection conn = null;
+
+	public Connection openDB() throws Exception
+	{
+		try
+		{
+			if (conn == null)
+			{
+				Class.forName("com.mysql.jdbc.Driver");
+				conn = java.sql.DriverManager.getConnection("jdbc:mysql://"
+						+ Config.dbServerIp + ":" + Config.dbPort + "/"
+						+ Config.dbName + "?useUnicode=true&characterEncoding="
+						+ Config.dbEncoding, Config.dbUser, Config.dbPwd);
+			} else if (conn.isClosed() == true)
+			{
+				Class.forName("com.mysql.jdbc.Driver");
+				conn = java.sql.DriverManager.getConnection("jdbc:mysql://"
+						+ Config.dbServerIp + ":" + Config.dbPort + "/"
+						+ Config.dbName + "?useUnicode=true&characterEncoding="
+						+ Config.dbEncoding, Config.dbUser, Config.dbPwd);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return conn;
+	}
+
+	public static void main(String[] args)
+	{
+
+	}
+
+	public void closeDB() throws Exception
+	{
+		if (conn != null)
+		{
+			conn.close();
+		}
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.CommentBean;
+
+public class All_doc_numDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+	public int S;
+
+	public int getUserByName(int src)
+	{
+		// CommentBean commentBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String sql = "select count(*) from tab_doc where state = ?";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setInt(1, src);
+				rs = prepStmt.executeQuery();
+				if(rs.next())
+					S = rs.getInt(1);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return S;
+	}
+}
