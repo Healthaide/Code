@@ -1,0 +1,92 @@
+package cn.itcast.cstm.dao;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+
+import cn.itcast.cstm.domain.Customer;
+import cn.itcast.jdbc.TxQueryRunner;
+
+public class CustomerDao {
+	
+	private QueryRunner qr=new TxQueryRunner();
+	public void add(Customer c){
+		try{
+		String sql="insert into article values(?,?,?,?,?,?)";
+		Object[] params={c.getCid(),c.getTitle(),c.getDate(),c.getSource(),c.getKind(),c.getArticle()};
+		qr.update(sql,params);
+		
+	}catch(SQLException e){
+		throw new RuntimeException(e);
+	}
+	}
+	public void addt(Customer c){
+		try{
+		String sql="insert into topic values(?,?,?,?)";
+		Object[] params={c.getXid(),c.getTopicname(),c.getTopictime(),c.getTopicarticle()};
+		qr.update(sql,params);
+		
+	}catch(SQLException e){
+		throw new RuntimeException(e);
+	}
+	}
+	public void addm(Customer c){
+		try{
+		String sql="insert into message values(?,?,?,?)";
+		Object[] params={c.getYid(),c.getMessagearea(),c.getMessagetime(),c.getMessagearticle()};
+		qr.update(sql,params);
+		
+	}catch(SQLException e){
+		throw new RuntimeException(e);
+	}
+	}
+	public void addd(Customer c){
+		try{
+			String sql="insert into doctor2 values(?,?,?,?,?,?,?)";
+			Object[] params={c.getDid(),c.getName(),c.getHospital(),c.getDepartment(),c.getPosition(),c.getPhone(),c.getPassword()};
+			qr.update(sql,params);
+			
+		}catch(SQLException e){
+			throw new RuntimeException(e);
+		}
+		}
+		
+	  	public Customer load(String cid) {
+		try{
+		
+		String sql="select*from article where cid=?";
+		return qr.query(sql, new BeanHandler<Customer>(Customer.class),cid);
+		}catch(SQLException e){
+			throw new RuntimeException(e);
+			
+		}
+	}
+
+/*
+ * operation on article
+ */
+	public void edit(Customer c) {
+		try{
+	String sql="update article set title=?,date=?,source=?,kind=?,article=?where cid=? ";
+	Object[] params={c.getTitle(),c.getDate(),c.getSource(),c.getKind(),c.getArticle(),c.getCid()};
+			qr.update(sql, params);
+		} catch(SQLException e)	{
+		throw new RuntimeException(e);
+	}
+	}
+	
+	public void delete(String cid) {
+		String sql = "delete from article where cid=?";
+		Object[] params = {cid};
+		try {
+			qr.update(sql, params);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+}
