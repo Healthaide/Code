@@ -1,0 +1,437 @@
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Card_followDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(int src,String src1, int src2,int src3)
+	{
+
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+
+				String sql = "insert into card_follow (id,content,floor,towards) values(?,?,?,?)";
+
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setInt(1, src);
+				prepStmt.setString(2, src1);
+				prepStmt.setInt(3, src2);
+				prepStmt.setInt(4, src3);
+//				prepStmt.setString(4, src3);
+//				prepStmt.setString(5, src4);
+//				prepStmt.setString(6, src5);
+//				prepStmt.setString(7, src6);
+
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.ArticleCollectionBean;
+import cn.domain.hello.bean.CardBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.CommentCollectionBean;
+import cn.domain.hello.bean.Detail_articleBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.List_articleBean;
+
+public class Card_hotDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<CardBean> getUserByName()
+	{
+		CardBean commentcollectionBean = null;
+		List<CardBean> keys = new ArrayList<CardBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//String sql = "select * from article_collection where phone = ? order by date desc";
+				String sql = "select * from card  order by click desc ";
+				prepStmt = conn.prepareStatement(sql);
+				// String src1=src+"";
+				//prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// detail_articleBean = new Detail_articleBean(
+				// rs.getString(1), rs.getString(2), rs.getString(3),
+				// rs.getString(4), rs.getString(5), rs.getString(6),
+				// rs.getString(7),rs.getInt(8));
+				// }
+				// int count=keys.size();
+				// List<Detail_articleBean> num = new
+				// ArrayList<Detail_articleBean>();
+				//int a = rs.getRow();
+				while (rs.next() )
+				{
+					//Detail_articleBean key = new Detail_articleBean();
+					CardBean key = new CardBean();
+//					key.setTitle(rs.getString("title"));
+//					key.setDate(rs.getString("date"));
+//					key.setSource(rs.getString("source"));
+//					key.setKind(rs.getString("kind"));
+//					key.setArticle(rs.getString("article"));
+//
+//					key.setToken(rs.getString("token"));
+					key.setId(rs.getInt("id"));
+					key.setHead(rs.getString("head"));
+					key.setNickname(rs.getString("nickname"));
+					key.setTitle(rs.getString("title"));
+					key.setContent(rs.getString("content"));
+					key.setFloor(rs.getInt("floor"));
+					keys.add(key);
+				}
+				// for(int i=0;i<num.size();i++){
+				// keys.add(num.get(i));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.ArticleCollectionBean;
+import cn.domain.hello.bean.CardBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.CommentCollectionBean;
+import cn.domain.hello.bean.Detail_articleBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.List_articleBean;
+
+public class Card_myDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<CardBean> getUserByName(String src)
+	{
+		CardBean commentcollectionBean = null;
+		List<CardBean> keys = new ArrayList<CardBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//String sql = "select * from article_collection where phone = ? order by date desc";
+				String sql = "select * from card where nickname = ? order by date desc ";
+				prepStmt = conn.prepareStatement(sql);
+				// String src1=src+"";
+				prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// detail_articleBean = new Detail_articleBean(
+				// rs.getString(1), rs.getString(2), rs.getString(3),
+				// rs.getString(4), rs.getString(5), rs.getString(6),
+				// rs.getString(7),rs.getInt(8));
+				// }
+				// int count=keys.size();
+				// List<Detail_articleBean> num = new
+				// ArrayList<Detail_articleBean>();
+				//int a = rs.getRow();
+				while (rs.next() )
+				{
+					//Detail_articleBean key = new Detail_articleBean();
+					CardBean key = new CardBean();
+//					key.setTitle(rs.getString("title"));
+//					key.setDate(rs.getString("date"));
+//					key.setSource(rs.getString("source"));
+//					key.setKind(rs.getString("kind"));
+//					key.setArticle(rs.getString("article"));
+//
+//					key.setToken(rs.getString("token"));
+					key.setId(rs.getInt("id"));
+					key.setHead(rs.getString("head"));
+					key.setNickname(rs.getString("nickname"));
+					key.setTitle(rs.getString("title"));
+					key.setContent(rs.getString("content"));
+					key.setFloor(rs.getInt("floor"));
+					keys.add(key);
+				}
+				// for(int i=0;i<num.size();i++){
+				// keys.add(num.get(i));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.ArticleCollectionBean;
+import cn.domain.hello.bean.CardBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.CommentCollectionBean;
+import cn.domain.hello.bean.Detail_articleBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.List_articleBean;
+
+public class Card_newDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<CardBean> getUserByName()
+	{
+		CardBean commentcollectionBean = null;
+		List<CardBean> keys = new ArrayList<CardBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//String sql = "select * from article_collection where phone = ? order by date desc";
+				String sql = "select * from card  order by date desc ";
+				prepStmt = conn.prepareStatement(sql);
+				// String src1=src+"";
+				//prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// detail_articleBean = new Detail_articleBean(
+				// rs.getString(1), rs.getString(2), rs.getString(3),
+				// rs.getString(4), rs.getString(5), rs.getString(6),
+				// rs.getString(7),rs.getInt(8));
+				// }
+				// int count=keys.size();
+				// List<Detail_articleBean> num = new
+				// ArrayList<Detail_articleBean>();
+				//int a = rs.getRow();
+				while (rs.next() )
+				{
+					//Detail_articleBean key = new Detail_articleBean();
+					CardBean key = new CardBean();
+//					key.setTitle(rs.getString("title"));
+//					key.setDate(rs.getString("date"));
+//					key.setSource(rs.getString("source"));
+//					key.setKind(rs.getString("kind"));
+//					key.setArticle(rs.getString("article"));
+//
+					key.setId(rs.getInt("id"));
+					//key.setToken(rs.getString("token"));
+					key.setHead(rs.getString("head"));
+					key.setNickname(rs.getString("nickname"));
+					key.setTitle(rs.getString("title"));
+					key.setContent(rs.getString("content"));
+					key.setDate(rs.getString("date"));
+					key.setFloor(rs.getInt("floor"));
+					keys.add(key);
+				}
+				// for(int i=0;i<num.size();i++){
+				// keys.add(num.get(i));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import cn.domain.hello.bean.ArticleBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.List_articleBean;
+import cn.domain.hello.bean.SearchBean;
+
+public class Card_numDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public int S;
+	
+	// List<String> list = new ArrayList();
+	public int getUserByName()
+	{
+		//SearchBean commentBean = null;
+		//List<SearchBean> keys = new ArrayList<SearchBean>();
+		// Map<String,Object>map= new HashMap<String,String>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//String tt="%"+src+"%";
+				//String sql = "select * from tab_list_article,tab_user where tab_user.token=? is not null order by browse desc";
+//				String sql = "select *from news where title like '"+tt+"'";
+				String sql = "select count(*) from card ";
+				//int a=0;
+				prepStmt = conn.prepareStatement(sql);
+				// String src1=src+"";
+				//prepStmt.setString(1, "%"+src+"%");
+				rs = prepStmt.executeQuery();
+				if(rs.next())
+					S = rs.getInt(1);
+				// ResultSetMetaData resultSetMetaDate = rs.getMetaData();
+				// int columnCount = resultSetMetaDate.getColumnCount();
+				// while (rs.next()) {
+				// commentBean = new CommentBean(rs.getString(1),
+				// rs.getString(2), rs.getString(3), rs.getString(4),
+				// rs.getInt(5),rs.getString(6));
+				// }
+
+//				while (rs.next() && rs.getRow() <= 10)
+//				{
+//					SearchBean key = new SearchBean();
+//					key.setTitle(rs.getString("title"));
+//					key.setUrl(rs.getString("url"));
+//					key.setContent(rs.getString("content"));
+//					key.setDate(rs.getString("date"));
+////					key.setToken(rs.getString("token"));
+//					//key.setDate(rs.getString("date"));
+//					keys.add(key);
+//				}
+//				// CommentBean cb = new CommentBean();
+				// cb.setHead(rs.getString(1));
+				// cb.setContent(rs.getString(2));
+				// cb.setPhone(rs.getString(3));
+				// cb.setToken(rs.getString(4));
+				// cb.setId(rs.getInt(5));
+				// cb.setDate(rs.getString(6));
+				// list.add(cb);
+				//
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return S;
+	}
+}
