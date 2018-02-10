@@ -1,0 +1,73 @@
+package cn.domain.hello.bean;
+
+public class ArticleCollectionBean
+{
+	private String phone;
+	private int id;
+	public ArticleCollectionBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public ArticleCollectionBean(String phone, int id)
+	{
+		super();
+		this.phone = phone;
+		this.id = id;
+	}
+	public String getPhone()
+	{
+		return phone;
+	}
+	public void setPhone(String phone)
+	{
+		this.phone = phone;
+	}
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	
+
+	
+
+}
+package cn.domain.hello.bean;
+
+public class CardfollowBean {
+	private int id;
+	private String content;
+	private int to;
+	public CardfollowBean() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public CardfollowBean(int id, String content, int to) {
+		super();
+		this.id = id;
+		this.content = content;
+		this.to = to;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public int getTo() {
+		return to;
+	}
+	public void setTo(int to) {
+		this.to = to;
+	}
+}
