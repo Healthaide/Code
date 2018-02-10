@@ -1,0 +1,147 @@
+package cn.domain.hello.bean;
+
+public class CmtBean
+{
+	private String content;
+	private String date;
+	private String token;
+	public CmtBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public CmtBean(String content, String date, String token)
+	{
+		super();
+		this.content = content;
+		this.date = date;
+		this.token = token;
+	}
+	public String getContent()
+	{
+		return content;
+	}
+	public void setContent(String content)
+	{
+		this.content = content;
+	}
+	public String getDate()
+	{
+		return date;
+	}
+	public void setDate(String date)
+	{
+		this.date = date;
+	}
+	public String getToken()
+	{
+		return token;
+	}
+	public void setToken(String token)
+	{
+		this.token = token;
+	}
+	
+}
+package cn.domain.hello.bean;
+
+public class CommentBean
+{
+	private String phone;
+	private String content;
+	private String date;
+	private String token;
+	private int id;
+	public CommentBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public CommentBean(String phone, String content, String date, String token,
+			int id)
+	{
+		super();
+		this.phone = phone;
+		this.content = content;
+		this.date = date;
+		this.token = token;
+		this.id = id;
+	}
+	public String getPhone()
+	{
+		return phone;
+	}
+	public void setPhone(String phone)
+	{
+		this.phone = phone;
+	}
+	public String getContent()
+	{
+		return content;
+	}
+	public void setContent(String content)
+	{
+		this.content = content;
+	}
+	public String getDate()
+	{
+		return date;
+	}
+	public void setDate(String date)
+	{
+		this.date = date;
+	}
+	public String getToken()
+	{
+		return token;
+	}
+	public void setToken(String token)
+	{
+		this.token = token;
+	}
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	
+}
+package cn.domain.hello.bean;
+
+public class CommentCollectionBean
+{
+	private String phone;
+	private int id;
+	public CommentCollectionBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public CommentCollectionBean(String phone, int id)
+	{
+		super();
+		this.phone = phone;
+		this.id = id;
+	}
+	public String getPhone()
+	{
+		return phone;
+	}
+	public void setPhone(String phone)
+	{
+		this.phone = phone;
+	}
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	
+}
+
