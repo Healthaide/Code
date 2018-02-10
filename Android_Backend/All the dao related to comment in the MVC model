@@ -1,0 +1,267 @@
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Comment_commitDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1, int src2, String src3)
+	{
+		String str = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				str = src1.substring(0, 11);
+				String sql = "insert into  tab_comment ( phone,content,token,id,date)VALUES('"
+						+ str + "',?,?,?,?)";
+
+				prepStmt = conn.prepareStatement(sql);
+				// String src2=src+"";
+				// String src3=src1+"";
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				prepStmt.setInt(3, src2);
+				prepStmt.setString(4, src3);
+
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Comment_doc_commitDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1, String src2, String src3)
+	{
+		String str = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//str = src1.substring(0, 11);
+//				String sql = "insert into  tab_doc_comment ( phone,content,token,id,date)VALUES('"
+//						+ str + "',?,?,?,?)";
+				String sql = "insert into  tab_doc_comment ( phone,content,time,token)VALUES(?,?,?,?)";
+
+				prepStmt = conn.prepareStatement(sql);
+				// String src2=src+"";
+				// String src3=src1+"";
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				prepStmt.setString(3, src2);
+				prepStmt.setString(4, src3);
+
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.ArticleCollectionBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.CommentCollectionBean;
+import cn.domain.hello.bean.Detail_articleBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.List_articleBean;
+
+public class CommentCollectionDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<CommentCollectionBean> getUserByName(String src)
+	{
+		CommentCollectionBean commentcollectionBean = null;
+		List<CommentCollectionBean> keys = new ArrayList<CommentCollectionBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//String sql = "select * from article_collection where phone = ? order by date desc";
+				String sql = "select phone from tab_comment where id = ? ";
+				prepStmt = conn.prepareStatement(sql);
+				// String src1=src+"";
+				prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// detail_articleBean = new Detail_articleBean(
+				// rs.getString(1), rs.getString(2), rs.getString(3),
+				// rs.getString(4), rs.getString(5), rs.getString(6),
+				// rs.getString(7),rs.getInt(8));
+				// }
+				// int count=keys.size();
+				// List<Detail_articleBean> num = new
+				// ArrayList<Detail_articleBean>();
+				//int a = rs.getRow();
+				while (rs.next() )
+				{
+					//Detail_articleBean key = new Detail_articleBean();
+					CommentCollectionBean key = new CommentCollectionBean();
+//					key.setTitle(rs.getString("title"));
+//					key.setDate(rs.getString("date"));
+//					key.setSource(rs.getString("source"));
+//					key.setKind(rs.getString("kind"));
+//					key.setArticle(rs.getString("article"));
+//
+//					key.setToken(rs.getString("token"));
+					key.setPhone(rs.getString("phone"));
+					keys.add(key);
+				}
+				// for(int i=0;i<num.size();i++){
+				// keys.add(num.get(i));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Complaint_commitDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1, String src2)
+	{
+		String str = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				str = src2.substring(0, 11);
+				String sql = "insert into  tab_judge ( phone,content,date,token)VALUES('"
+						+ str + "',?,?,?)";
+
+				prepStmt = conn.prepareStatement(sql);
+				// String src2=src+"";
+				// String src3=src1+"";
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				prepStmt.setString(3, src2);
+				//prepStmt.setString(4, src3);
+
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
