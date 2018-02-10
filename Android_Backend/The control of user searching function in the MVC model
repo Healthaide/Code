@@ -1,0 +1,125 @@
+package cn.domain.hello.servlet;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import cn.domain.hello.bean.RegistBean;
+import cn.domain.hello.dao.UserSearchDao;
+import cn.domain.hello.dao.ViewListDao;
+import cn.domain.hello.domain.UserSearch;
+import cn.domain.hello.domain.ViewList;
+import cn.domain.hello.tool.Dir;
+import cn.domain.hello.tool.Nlpir;
+
+public class UserSearchServlet extends HttpServlet {
+	private static UserSearchDao usd = new UserSearchDao();
+	private static ViewListDao vld = new ViewListDao();
+	private static ViewListServlet vls = new ViewListServlet();
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/json;charset=utf-8");
+		Gson gson = new Gson();
+		HttpSession session = request.getSession(true);
+		
+		try{
+			BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8"));
+			StringBuffer sb = new StringBuffer("");
+			String temp;
+			while ((temp = br.readLine()) != null) {
+				sb.append(temp);
+			}
+			br.close();
+			String reqMessage = sb.toString();
+			System.out.println("请求信息:" + reqMessage);
+			JSONArray reqObject1 = new JSONArray(reqMessage);
+			JSONArray reqObject2 = new JSONArray(reqMessage);
+//			ps = gson.fromJson(sb.toString(),new TypeToken<Map<String, String>>() {}.getType());
+		    
+			String searchwords = reqObject1.getJSONObject(0).getString("searchwords");
+			int stable = -1;
+			String action = "";
+			if (reqObject2.getJSONObject(0).getString("action").equals("article_search")) {
+				stable = 0;
+				action = "as_flippage";
+			} 
+			if (reqObject2.getJSONObject(0).getString("action").equals("self_diagnose")) {
+				stable = 1;
+				action = "sd_flippage";
+			}
+			
+			//String searchwords = "挥鞭伤";
+			//int stable = 0;
+			//System.out.println("请求信息:" + searchwords);
+			
+			Map<String, Object> status = new HashMap<String, Object>();
+			PrintWriter writer = response.getWriter();
+
+			if (searchwords == null || -1 == stable) {
+				status.put("status", 1);
+				System.out.println("反馈信息:" + "status:" + status.get("status"));
+				writer.print(new Gson().toJson(status));
+				writer.flush();
+				writer.close();
+			} else {
+				searchwords = Nlpir.segmentation(searchwords);
+				
+				System.out.println(searchwords);
+
+				UserSearch us = usd.getSWord(searchwords, stable);
+				
+				if (us.getList() != null && !us.getList().isEmpty()) {
+					ViewList vl = vld.getSDir(us.getList(), 0, stable);
+					Map<String, Object> map = new HashMap<String, Object>();
+
+					if (vl.getList() == null) {
+						map.put("status", 1);
+						System.out.println("反馈信息v:" + "status:" + map.get("status"));
+						writer.print(map);
+					} else {
+						map.put("status", 0);
+						map.put("List", us.getList());
+						String body = "body";
+						Dir dir = new Dir();
+						for (int x = 0; x < vl.getList().size(); x++) {
+							String b = body.concat(String.valueOf(x));
+							dir = (Dir) vl.getList().get(x);
+							map.put(b, dir);
+						}
+						System.out.println("反馈信息v:" + new Gson().toJson(map));
+						writer.print(new Gson().toJson(map));
+					}
+					writer.flush();
+					writer.close();
+				} else{
+					status.put("status", 1);
+					System.out.println("反馈信息:" + new Gson().toJson(status));
+					writer.print(new Gson().toJson(status));
+					writer.flush();
+					writer.close();
+				}
+			}
+		}catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
+}
