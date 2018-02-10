@@ -1,0 +1,405 @@
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.ArticleCollectionBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.Detail_articleBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.List_articleBean;
+
+public class Article_checkDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<ArticleCollectionBean> getUserByName(String src)
+	{
+		ArticleCollectionBean detail_articleBean = null;
+		List<ArticleCollectionBean> keys = new ArrayList<ArticleCollectionBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				//String sql = "select * from article_collection where phone = ? order by date desc";
+				String sql = "select id from article_collection where phone = ? ";
+				prepStmt = conn.prepareStatement(sql);
+				// String src1=src+"";
+				prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// detail_articleBean = new Detail_articleBean(
+				// rs.getString(1), rs.getString(2), rs.getString(3),
+				// rs.getString(4), rs.getString(5), rs.getString(6),
+				// rs.getString(7),rs.getInt(8));
+				// }
+				// int count=keys.size();
+				// List<Detail_articleBean> num = new
+				// ArrayList<Detail_articleBean>();
+				int a = rs.getRow();
+				while (rs.next() && rs.getRow() <= 10)
+				{
+					//Detail_articleBean key = new Detail_articleBean();
+					ArticleCollectionBean key = new ArticleCollectionBean();
+//					key.setTitle(rs.getString("title"));
+//					key.setDate(rs.getString("date"));
+//					key.setSource(rs.getString("source"));
+//					key.setKind(rs.getString("kind"));
+//					key.setArticle(rs.getString("article"));
+//
+//					key.setToken(rs.getString("token"));
+					key.setId(rs.getInt("id"));
+					keys.add(key);
+				}
+				// for(int i=0;i<num.size();i++){
+				// keys.add(num.get(i));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.ArticleCollectionBean;
+
+public class Article_collectionDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement瀹炰緥鍖呭惈宸茬紪璇戠殑SQL璇彞锛屼娇璇彞鍑嗗濂斤紝淇濆瓨鐨勶紵闇�鍦ㄨ鎵ц鍓嶉�杩噑etXXX鏂规硶鎻愪緵
+	public int rs;// setString瀹氫箟浜嗗瓧绗︿覆涓n涓紵瀛楃鐨勬浛鎹�
+
+	public int getUserByName(String src, int src1)
+	{
+		ArticleCollectionBean articleCollectionBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				// RandomTest S = new RandomTest();
+				// C = S.RandomToken();
+				// String D=src+src1;
+				String sql = "insert into article_collection(phone,id)values(?,?)";
+				prepStmt = conn.prepareStatement(sql);
+
+				// String src9=src+"";
+				// String src10=src+"";
+				// String src11=src+"";
+				// String src12=src+"";
+				// String src13=src+"";
+				prepStmt.setString(1, src);
+				prepStmt.setInt(2, src1);
+				// prepStmt.setString(3, src9);
+				// prepStmt.setString(4, src10);
+				// prepStmt.setString(5, src11);
+				// prepStmt.setString(6, src12);
+				// prepStmt.setString(7, src13);
+
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.ArticleCollectionBean;
+
+public class Article_deleteDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement瀹炰緥鍖呭惈宸茬紪璇戠殑SQL璇彞锛屼娇璇彞鍑嗗濂斤紝淇濆瓨鐨勶紵闇�鍦ㄨ鎵ц鍓嶉�杩噑etXXX鏂规硶鎻愪緵
+	public int rs;// setString瀹氫箟浜嗗瓧绗︿覆涓n涓紵瀛楃鐨勬浛鎹�
+
+	public int getUserByName(String src, int src1)
+	{
+		ArticleCollectionBean articleCollectionBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				// RandomTest S = new RandomTest();
+				// C = S.RandomToken();
+				// String D=src+src1;
+				String sql = "delete from article_collection where phone=? and id=?";
+				prepStmt = conn.prepareStatement(sql);
+
+				prepStmt.setString(1, src);
+				prepStmt.setInt(2, src1);
+
+				rs = prepStmt.executeUpdate();
+			
+					
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.CommentBean;
+
+public class Article_like_numDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+	public int S;
+
+	public int getUserByName(String src)
+	{
+		// CommentBean commentBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String sql = "select count(*) from article_collection where phone = ?";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				if(rs.next())
+					S = rs.getInt(1);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return S;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Article_likeDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1)
+	{
+		RegistBean registBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String D = src + src1;
+				String sql = "insert into article_collection(phone,id)values(?,?)";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				// prepStmt.setString(3, src2);
+				// prepStmt.setString(4, src3);
+				// prepStmt.setString(5, src4);
+				// prepStmt.setString(6, src5);
+				// prepStmt.setString(7, D);
+
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.awt.List;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
+
+import cn.domain.hello.bean.List_articleBean;
+import cn.domain.hello.bean.ArticleBean;
+
+public class ArticleDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	// public PreparedStatement prepStmt2 = null;
+	public ResultSet rs = null;
+
+	// public int rs2;
+
+	public ArticleBean getUserByName(int src)
+	{
+		// String C=null;
+		ArticleBean article = null;
+		// ArrayList<String> list = new ArrayList();
+		try
+		{
+			conn = super.openDB();
+
+			if (conn != null)
+			{
+
+				String sql = "select * from article where id = ?  ";
+				// String sql2 = "update article set click= click+1";
+				// prepStmt2 = conn.prepareStatement(sql2);
+				// String src1=src+"";
+				// prepStmt2.setString(1, src1);
+				// rs2 = prepStmt2.executeUpdate();
+
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setInt(1, src);
+				rs = prepStmt.executeQuery();
+				// ResultSetMetaData resultSetMetaDate = rs.getMetaData();
+				// int columnCount = resultSetMetaDate.getColumnCount();
+				if (rs.next())
+				{
+					article = new ArticleBean(rs.getInt(1), rs.getString(2),
+							rs.getString(3), rs.getString(4), rs.getString(5),
+							rs.getString(6), rs.getInt(7));
+				}
+				// while(rs.next()){
+				// for(int i=1;i<=columnCount;i++){
+				// list.add(rs.getString(i));
+				// }
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+
+				// if (prepStmt2 != null)
+				// prepStmt2.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return article;
+	}
+}
