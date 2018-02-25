@@ -1,0 +1,4699 @@
+// UserBean 
+package cn.domain.hello.bean;
+
+public class UserBean
+{
+
+	private String phone;
+	private String code;
+	private String password;
+
+	public UserBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public UserBean(String phone, String code, String password)
+	{
+		super();
+		this.phone = phone;
+		this.code = code;
+		this.password = password;
+	}
+
+	public String getPhone()
+	{
+		return phone;
+	}
+
+	public void setPhone(String phone)
+	{
+		this.phone = phone;
+	}
+
+	public String getCode()
+	{
+		return code;
+	}
+
+	public void setCode(String code)
+	{
+		this.code = code;
+	}
+
+	public String getPassword()
+	{
+		return password;
+	}
+
+	public void setPassword(String password)
+	{
+		this.password = password;
+	}
+
+}
+//config the database
+package cn.domain.hello.config;
+
+public class Config
+{
+
+	public static final String dbServerIp = "localhost";// 锟斤拷菘锟斤拷锟斤拷锟斤拷IP
+	public static final String dbUser = "root";// 锟斤拷菘锟斤拷没锟斤拷锟�
+	public static final String dbPwd = "root";// 锟斤拷菘锟斤拷锟斤拷锟�
+	public static final String dbPort = "3306";// 锟斤拷菘锟剿口猴拷
+	public static final String dbName = "world";// 锟斤拷菘锟斤拷锟�
+	public static final String dbEncoding = "UTF-8";// 锟斤拷菘锟斤拷锟斤拷
+}
+//Dao The select code.
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.CommentBean;
+
+public class All_doc_numDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+	public int S;
+
+	public int getUserByName(int src)
+	{
+		// CommentBean commentBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String sql = "select count(*) from tab_doc where state = ?";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setInt(1, src);
+				rs = prepStmt.executeQuery();
+				if(rs.next())
+					S = rs.getInt(1);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return S;
+	}
+}
+//The control
+package cn.domain.hello.servlet;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.gson.Gson;
+
+import cn.domain.hello.bean.ArticleBean;
+import cn.domain.hello.bean.ArticleCollectionBean;
+import cn.domain.hello.bean.CommentBean;
+import cn.domain.hello.bean.DepartiBean;
+import cn.domain.hello.bean.DepartmentBean;
+import cn.domain.hello.bean.Detail_articleBean;
+import cn.domain.hello.bean.DisartiBean;
+import cn.domain.hello.bean.DiseaseBean;
+import cn.domain.hello.bean.Disease_and_guideBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.Doc_commentBean;
+import cn.domain.hello.bean.GuideBean;
+import cn.domain.hello.bean.JudgeBean;
+import cn.domain.hello.bean.List_articleBean;
+import cn.domain.hello.bean.RegistBean;
+import cn.domain.hello.bean.RgtBean;
+import cn.domain.hello.bean.SymartiBean;
+import cn.domain.hello.bean.SymdisBean;
+import cn.domain.hello.bean.SymptomBean;
+import cn.domain.hello.bean.TopicBean;
+import cn.domain.hello.bean.UserBean;
+import cn.domain.hello.dao.ArticleDao;
+import cn.domain.hello.dao.Article_checkDao;
+import cn.domain.hello.dao.Article_collectionDao;
+import cn.domain.hello.dao.Article_deleteDao;
+import cn.domain.hello.dao.Article_likeDao;
+import cn.domain.hello.dao.Back_phoneDao;
+import cn.domain.hello.dao.Card_followDao;
+import cn.domain.hello.dao.Change_add_Dao;
+import cn.domain.hello.dao.Change_area_Dao;
+import cn.domain.hello.dao.Change_doc_area_Dao;
+import cn.domain.hello.dao.Change_doc_pw_Dao;
+import cn.domain.hello.dao.Change_doc_dp_Dao;
+import cn.domain.hello.dao.Change_doc_ps_Dao;
+import cn.domain.hello.dao.Change_head_Dao;
+import cn.domain.hello.dao.Change_intro_Dao;
+import cn.domain.hello.dao.Change_nick_Dao;
+import cn.domain.hello.dao.Change_pw_Dao;
+import cn.domain.hello.dao.Change_sch_Dao;
+import cn.domain.hello.dao.Change_sex_Dao;
+import cn.domain.hello.dao.Check_id;
+import cn.domain.hello.dao.CodeDao;
+import cn.domain.hello.dao.CodeSelectDao;
+import cn.domain.hello.dao.CollectionCheckDao;
+import cn.domain.hello.dao.Comment_commitDao;
+import cn.domain.hello.dao.Comment_doc_commitDao;
+import cn.domain.hello.dao.Complaint_commitDao;
+import cn.domain.hello.dao.Create_topicDao;
+import cn.domain.hello.dao.DepartiDao;
+import cn.domain.hello.dao.DepartmentDao;
+import cn.domain.hello.dao.DisartiDao;
+import cn.domain.hello.dao.DiseaseDao;
+import cn.domain.hello.dao.Disease_check;
+import cn.domain.hello.dao.Doc_collectionDao;
+import cn.domain.hello.dao.Doc_collection_checkDao;
+import cn.domain.hello.dao.Doc_collection_numDao;
+import cn.domain.hello.dao.Doc_deleteDao;
+import cn.domain.hello.dao.Doc_detailDao;
+import cn.domain.hello.dao.Doc_lg_Dao;
+import cn.domain.hello.dao.Doc_listDao;
+import cn.domain.hello.dao.Doc_list_numDao;
+import cn.domain.hello.dao.Doc_rg_Dao;
+import cn.domain.hello.dao.FeedbackDao;
+import cn.domain.hello.dao.Find_tokenDao;
+import cn.domain.hello.dao.Floor_numDao;
+import cn.domain.hello.dao.Get_codeDao;
+import cn.domain.hello.dao.Get_headDao;
+import cn.domain.hello.dao.Get_topic_list_numDao;
+import cn.domain.hello.dao.GetcommentDao;
+import cn.domain.hello.dao.Getcomment_3Dao;
+import cn.domain.hello.dao.Getcomment_numDao;
+import cn.domain.hello.dao.GetcommentlotDao;
+import cn.domain.hello.dao.Getdoc_commentDao;
+import cn.domain.hello.dao.GetjudgeDao;
+import cn.domain.hello.dao.GuideDao;
+import cn.domain.hello.dao.HeadDao;
+import cn.domain.hello.dao.Id_to_allDao;
+import cn.domain.hello.dao.Id_to_floorDao;
+import cn.domain.hello.dao.ImproveDao;
+import cn.domain.hello.dao.Improve_openfire;
+import cn.domain.hello.dao.Judge_get_numDao;
+import cn.domain.hello.dao.Key;
+import cn.domain.hello.dao.KeyService;
+import cn.domain.hello.dao.Last_articleDao;
+import cn.domain.hello.dao.LoginDao;
+import cn.domain.hello.dao.NewsCollectionDao;
+import cn.domain.hello.dao.News_deleteDao;
+import cn.domain.hello.dao.Phone_to_head;
+import cn.domain.hello.dao.Phone_to_nicknameDao;
+import cn.domain.hello.dao.Phone_to_token;
+import cn.domain.hello.dao.RandomTest;
+import cn.domain.hello.dao.RegistDao;
+import cn.domain.hello.dao.Register_openfireDao;
+import cn.domain.hello.dao.Select_doc_y_n;
+import cn.domain.hello.dao.Select_y_nDao;
+import cn.domain.hello.dao.SetjudgeDao;
+import cn.domain.hello.dao.SymartiDao;
+import cn.domain.hello.dao.SymdisDao;
+import cn.domain.hello.dao.SymptomDao;
+import cn.domain.hello.dao.Token_to_head;
+import cn.domain.hello.dao.Token_to_phone;
+import cn.domain.hello.dao.Token_to_phone_doc;
+import cn.domain.hello.dao.Token_to_phone_new;
+import cn.domain.hello.dao.Topic_comment_commitDao;
+import cn.domain.hello.dao.UpdatefocusDao;
+import cn.domain.hello.dao.UserCheckDao;
+import cn.domain.hello.dao.UserDao;
+import cn.domain.hello.dao.UserSearchDao;
+import cn.domain.hello.dao.User_check;
+import cn.domain.hello.dao.User_detailDao;
+import cn.domain.hello.dao.ViewListDao;
+import cn.domain.hello.domain.UserSearch;
+import cn.domain.hello.dao.UserSearchDao;
+import cn.domain.hello.dao.ViewListDao;
+import cn.domain.hello.domain.UserSearch;
+import cn.domain.hello.domain.ViewList;
+import cn.domain.hello.tool.Dir;
+import cn.domain.hello.tool.Nlpir;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class LoginServlet extends HttpServlet
+{
+	private static UserSearchDao usd = new UserSearchDao();
+	private static ViewListDao vld = new ViewListDao();
+	private static ViewListServlet vls = new ViewListServlet();
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private KeyService keyService = new KeyService();
+
+	/**
+	 * The doGet method of the servlet. <br>
+	 * 
+	 * This method is called when a form has its tag value method equals to get.
+	 * 
+	 * @param request
+	 *            the request send by the client to the server
+	 * @param response
+	 *            the response send by the server to the client
+	 * @throws ServletException
+	 *             if an error occurred
+	 * @throws IOException
+	 *             if an error occurred
+	 */
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException
+	{
+
+		// String token = request.getParameter("token");
+		// String id = request.getParameter("id");
+		// System.out.println(token);
+		// System.out.println(id);
+
+		try
+		{
+			// System.out.println(keyService.getUserKeys(id));
+			// out.write(keyService.getUserKeys(id));
+			// out.flush();
+			// out.close();
+			String phone = request.getParameter("phone");
+			//String id = request.getParameter("id");
+			response.setCharacterEncoding("utf-8");
+			PrintWriter out = response.getWriter();
+			System.out.println(keyService.getUserCheck(phone));
+			out.write(keyService.getUserCheck(phone));
+			out.flush();
+			out.close();
+		} catch (NumberFormatException e)
+		{
+			e.printStackTrace();
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	// Map map = request.getParameterMap();
+	// Set keSet = map.entrySet();
+	// for(Iterator itr=keSet.iterator();itr.hasNext();){
+	// Map.Entry me = (Map.Entry)itr.next();
+	// Object ok=me.getKey();
+	// Object ov=me.getValue();
+	// String[] value = new String[1];
+	// if(ov instanceof String[]){
+	// value[0]=ov.toString();
+	// }
+	// for(int k=0;k<value.length;k++){
+	// System.out.println(ok+"="+value[k]);
+	// }
+	// response.setCharacterEncoding("utf-8");
+	// PrintWriter out = response.getWriter();
+	// try {
+	// // System.out.println(keyService.getUserKeys(id));
+	// // out.write(keyService.getUserKeys(id));
+	// // out.flush();
+	// // out.close();
+	//
+	// System.out.println(keyService.getUserCheck(token,id));
+	// out.write(keyService.getUserCheck(token,id));
+	// out.flush();
+	// out.close();
+	// } catch (NumberFormatException e) {
+	// e.printStackTrace();
+	// } catch (SQLException e) {
+	// e.printStackTrace();
+	// }
+	// }
+
+	// response.setCharacterEncoding("utf-8");
+	// PrintWriter out = response.getWriter();
+	// try {
+	// // System.out.println(keyService.getUserKeys(id));
+	// // out.write(keyService.getUserKeys(id));
+	// // out.flush();
+	// // out.close();
+	//
+	// System.out.println(keyService.getUserCheck(token,id));
+	// out.write(keyService.getUserCheck(token,id));
+	// out.flush();
+	// out.close();
+	// } catch (NumberFormatException e) {
+	// e.printStackTrace();
+	// } catch (SQLException e) {
+	// e.printStackTrace();
+	// }
+
+	// doPost(request, response);
+	// String a=request.getParameter("key");
+	// String b=request.getParameter("token");
+	//
+	// System.out.println(a);
+	// System.out.println(b);
+
+	/**
+	 * The doPost method of the servlet. <br>
+	 * 
+	 * This method is called when a form has its tag value method equals to
+	 * post.
+	 * 
+	 * @param request
+	 *            the request send by the client to the server
+	 * @param response
+	 *            the response send by the server to the client
+	 * @throws ServletException
+	 *             if an error occurred
+	 * @throws IOException
+	 *             if an error occurred
+	 */
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException
+	{
+		// System.out.println("postsssssss");
+
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/json;charset=UTF-8");
+		String reqMessage, respMessage, reqMessage2, respMessage2;
+		JSONArray reqObject = null;
+		JSONArray reqObject1 = null;
+		JSONArray reqObject2 = null;
+		JSONArray respObject = null;
+		JSONArray respObject2 = null;
+		// try {
+		// BufferedReader br = new BufferedReader(new InputStreamReader(
+		// request.getInputStream(), "UTF-8"));
+		// StringBuffer sb = new StringBuffer("");
+		// String temp;
+		// while ((temp = br.readLine()) != null) {
+		// sb.append(temp);
+		// }
+		// br.close();
+		// reqMessage = sb.toString();
+		// System.out.println("请求信息:" + reqMessage);
+		// reqObject = new JSONArray(reqMessage);
+		// reqObject2 = new JSONArray(reqMessage);
+		// if
+		// (reqObject.getJSONObject(0).getString("action").equals("commit_get"))
+		// {
+		// String id = reqObject.getJSONObject(0).getString("id");
+		// PrintWriter out = response.getWriter();
+		// System.out.println("反馈信息:" + keyService.getUserKeys(id));
+		// out.write(keyService.getUserKeys(id));
+		// out.flush();
+		// out.close();
+		// }
+		// } catch (NumberFormatException e) {
+		// e.printStackTrace();
+		// } catch (SQLException e) {
+		// e.printStackTrace();
+		// } catch (JSONException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// request.setCharacterEncoding("utf-8");
+		// //获得磁盘文件条目工厂。
+		// DiskFileItemFactory factory = new DiskFileItemFactory();
+		// //获取文件上传需要保存的路径，upload文件夹需存在。
+		// String path =
+		// request.getSession().getServletContext().getRealPath("/upload");
+		// //设置暂时存放文件的存储室，这个存储室可以和最终存储文件的文件夹不同。因为当文件很大的话会占用过多内存所以设置存储室。
+		// factory.setRepository(new File(path));
+		// //设置缓存的大小，当上传文件的容量超过缓存时，就放到暂时存储室。
+		// factory.setSizeThreshold(1024*1024);
+		// //上传处理工具类（高水平API上传处理？）
+		// ServletFileUpload upload = new ServletFileUpload(factory);
+		try
+		{
+
+			// 调用 parseRequest（request）方法 获得上传文件 FileItem 的集合list 可实现多文件上传。
+			// List<FileItem> list =
+			// (List<FileItem>)upload.parseRequest(request);
+			// for(FileItem item:list){
+			// //获取表单属性名字。
+			// String name = item.getFieldName();
+			// //如果获取的表单信息是普通的文本信息。即通过页面表单形式传递来的字符串。
+			// if(item.isFormField()){
+			// //获取用户具体输入的字符串，
+			// String value = item.getString();
+			// request.setAttribute(name, value);
+			// }
+			// //如果传入的是非简单字符串，而是图片，音频，视频等二进制文件。
+			// else{
+			// //获取路径名
+			// String value = item.getName();
+			// //取到最后一个反斜杠。
+			// int start = value.lastIndexOf("\\");
+			// //截取上传文件的 字符串名字。+1是去掉反斜杠。
+			// String filename = value.substring(start+1);
+			// request.setAttribute(name, filename);
+			//
+			// /*第三方提供的方法直接写到文件中。
+			// * item.write(new File(path,filename));*/
+			// //收到写到接收的文件中。
+			// OutputStream out = new FileOutputStream(new File(path,filename));
+			// InputStream in = item.getInputStream();
+			//
+			// int length = 0;
+			// byte[] buf = new byte[1024];
+			// System.out.println("获取文件总量的容量:"+ item.getSize());
+			//
+			// while((length = in.read(buf))!=-1){
+			// out.write(buf,0,length);
+			// }
+			// in.close();
+			// out.close();
+			// }
+			// }
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					request.getInputStream(), "UTF-8"));
+			StringBuffer sb = new StringBuffer("");
+			String temp;
+			while ((temp = br.readLine()) != null)
+			{
+				sb.append(temp);
+			}
+			br.close();
+			reqMessage = sb.toString();
+			System.out.println("请求信息:" + reqMessage);
+			reqObject = new JSONArray(reqMessage);
+			reqObject2 = new JSONArray(reqMessage);
+
+//			if (reqObject.getJSONObject(0).getString("action").equals("article_search")
+//					|| reqObject.getJSONObject(0).getString("action").equals("self_diagnose")){
+//				String searchwords = reqObject.getJSONObject(0).getString("searchwords");
+//				int stable = -1;
+//				if (reqObject.getJSONObject(0).getString("action").equals("article_search")) {
+//					stable = 0;
+//				} 
+//				if (reqObject.getJSONObject(0).getString("action").equals("self_diagnose")) {
+//					stable = 1;
+//				}
+//				
+//				//String searchwords = "挥鞭伤";
+//				//int stable = 0;
+//				//System.out.println("请求信息:" + searchwords);
+//				
+//				Map<String, Object> status = new HashMap<String, Object>();
+//				PrintWriter writer = response.getWriter();
+//				
+//				if (searchwords == null || -1 == stable) {
+//					status.put("status", 1);
+//					respMessage = "[" +new Gson().toJson(status)+"]";
+//					System.out.println("反馈信息v:" + respMessage);
+//					writer.print(respMessage);
+//					writer.flush();
+//					writer.close();
+//				} else {
+//					searchwords = Nlpir.segmentation(searchwords);
+//					
+//					System.out.println(searchwords);
+//
+//					UserSearch us = usd.getSWord(searchwords, stable);
+//					
+//					
+//					if (us.getList() != null && !us.getList().isEmpty()) {
+//						System.out.println(us.getList().isEmpty());
+//						
+//						ViewList vl = vld.getSDir(us.getList(), 0, stable);
+//						Map<String, Object> map = new HashMap<String, Object>();
+//
+//						if (vl.getList() == null) {
+//							map.put("status", 1);
+//							respMessage = "[" +new Gson().toJson(map)+"]";
+//							System.out.println("反馈信息v:" + respMessage);
+//							writer.print(respMessage);
+//						} else {
+//							map.put("status", 0);
+//							map.put("List", us.getList());
+//							String body = "body";
+//							Dir dir = new Dir();
+//							for (int x = 0; x < vl.getList().size(); x++) {
+//								String b = body.concat(String.valueOf(x));
+//								dir = (Dir) vl.getList().get(x);
+//								map.put(b, dir);
+//							}
+//							respMessage = "[" +new Gson().toJson(map)+"]";
+//							System.out.println("反馈信息v:" + respMessage);
+//							writer.print(respMessage);
+//						}
+//						writer.flush();
+//						writer.close();
+//					} else{
+//						status.put("status", 1);
+//						respMessage = "[" +new Gson().toJson(status)+"]";
+//						System.out.println("反馈信息v:" + respMessage);
+//						writer.print(respMessage);
+//						writer.flush();
+//						writer.close();
+//					}
+//				}
+//			}
+			
+			if (reqObject.getJSONObject(0).getString("action").equals("login"))
+			{
+
+				LoginDao registDao = new LoginDao();
+				List<RegistBean> rb = registDao.getUserByName(reqObject2
+						.getJSONObject(0).getString("phone"));
+				if(rb.get(0).getPassword()!=null&&rb.get(0).getPassword().equals(reqObject.getJSONObject(0)
+						.getString("password"))){
+					System.out.println(rb.get(0).getPhone());
+					System.out.println(rb.get(0).getPassword());
+					System.out.println(rb.get(0).getNickname());
+					System.out.println(rb.get(0).getSex());
+					System.out.println(rb.get(0).getArea());
+					System.out.println(rb.get(0).getIntro());
+					System.out.println(rb.get(0).getHead());
+
+				
+				
+				String C = rb.get(0).getPhone() + rb.get(0).getPassword();
+				
+				respObject = new JSONArray()
+				.put(new JSONObject().put("status", 0).put("token",C).put(
+						"body",
+						new JSONObject()
+								.put("nickname", rb.get(0).getNickname())
+								.put("sex", rb.get(0).getSex())
+								.put("area", rb.get(0).getArea())
+								
+								.put("intro", rb.get(0).getIntro())
+								.put("head", rb.get(0).getHead())));
+//				RegistBean rb = registDao.getUserByName(reqObject2
+//						.getJSONObject(0).getString("phone"));
+//
+//				if (rb.getPassword() != null
+//						&& rb.getPassword().equals(
+//								reqObject.getJSONObject(0)
+//										.getString("password")))
+//				{
+//					System.out.println(rb.getPhone());
+//					System.out.println(rb.getPassword());
+//					System.out.println(rb.getNickname());
+//					System.out.println(rb.getSex());
+//					System.out.println(rb.getArea());
+//					System.out.println(rb.getIntro());
+//					System.out.println(rb.getHead());
+//
+//					String C = rb.getPhone() + rb.getPassword();
+//
+//					// respObject = new JSONArray().put(new
+//					// JSONObject().put("status",0).put("body", new
+//					// JSONObject().put("nickname", "中国")));
+//					respObject = new JSONArray()
+//							.put(new JSONObject().put("status", 0).put("token",C).put(
+//									"body",
+//									new JSONObject()
+//											.put("nickname", rb.getNickname())
+//											.put("sex", rb.getSex())
+//											.put("area", rb.getArea())
+//											
+//											.put("intro", rb.getIntro())
+//											.put("head", rb.getHead())));
+				}
+
+				else if (rb.get(0).getPhone() != (reqObject.getJSONObject(0)
+						.getString("phone")))
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+
+				else if (rb.get(0).getPassword() != reqObject.getJSONObject(0)
+						.getString("password"))
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 2));
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			// else if (reqObject.getJSONObject(0).getString("action")
+			// .equals("login")) {
+			//
+			// LoginDao registDao = new LoginDao();
+			// RegistBean rb = registDao.getUserByName(reqObject2
+			// .getJSONObject(0).getString("phone"));
+			// System.out.println(rb.getPhone());
+			// System.out.println(rb.getPassword());
+			// System.out.println(rb.getNickname());
+			// System.out.println(rb.getSex());
+			// System.out.println(rb.getArea());
+			// System.out.println(rb.getAddress());
+			// System.out.println(rb.getSchool());
+			// System.out.println(rb.getHead());
+			//
+			// String C = rb.getPhone() + rb.getPassword();
+			//
+			// if (rb.getPassword() != null
+			// && rb.getPassword().equals(
+			// reqObject.getJSONObject(0)
+			// .getString("password"))) {
+			// // respObject = new JSONArray().put(new
+			// // JSONObject().put("status",0).put("body", new
+			// // JSONObject().put("nickname", "中国")));
+			// respObject = new JSONArray()
+			// .put(new JSONObject().put("status", 0).put(
+			// "body",
+			// new JSONObject()
+			// .put("nickname", rb.getNickname())
+			// .put("sex", rb.getSex())
+			// .put("area", rb.getArea())
+			// .put("address", rb.getAddress())
+			// .put("school", rb.getSchool())
+			// .put("head", rb.getHead())
+			// .put("token", C)));
+			// } else
+			// respObject = new JSONArray().put(new JSONObject().put(
+			// "status", 1));
+			// }
+
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("comment_get"))
+			{
+				String id = reqObject.getJSONObject(0).getString("id");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserKeys(id));
+				out.write(keyService.getUserKeys(id));
+				out.flush();
+				out.close();
+			}
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("card_new"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String phone = top.Token_to_phone(token);
+				Phone_to_nicknameDao pt = new Phone_to_nicknameDao();
+				String nickname = pt.token_to_phone_doc(phone);
+				
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getCardNew());
+				out.write(keyService.getCardNew());
+				out.flush();
+				out.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("card_hot"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String phone = top.Token_to_phone(token);
+				Phone_to_nicknameDao pt = new Phone_to_nicknameDao();
+				String nickname = pt.token_to_phone_doc(phone);
+				
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getCardHot());
+				out.write(keyService.getCardHot());
+				out.flush();
+				out.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("card_best"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String phone = top.Token_to_phone(token);
+				Phone_to_nicknameDao pt = new Phone_to_nicknameDao();
+				String nickname = pt.token_to_phone_doc(phone);
+				
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getCardHot());
+				out.write(keyService.getCardHot());
+				out.flush();
+				out.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("card_my"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String phone = top.Token_to_phone(token);
+				Phone_to_nicknameDao pt = new Phone_to_nicknameDao();
+				String nickname = pt.token_to_phone_doc(phone);
+				
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getCardMy(nickname));
+				out.write(keyService.getCardMy(nickname));
+				out.flush();
+				out.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("card_detail"))
+			{
+				String id = reqObject.getJSONObject(0).getString("id");
+				int a = Integer.parseInt(id);
+				Id_to_floorDao it = new Id_to_floorDao();
+				int b = it.getUserByName(a);
+//				Token_to_phone_new top = new Token_to_phone_new();
+//				String phone = top.Token_to_phone(token);
+//				Phone_to_nicknameDao pt = new Phone_to_nicknameDao();
+//				String nickname = pt.token_to_phone_doc(phone);
+				
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getFloortoallDao(a,b));
+				out.write(keyService.getFloortoallDao(a,b));
+				out.flush();
+				out.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("topic_comment_get"))
+			{
+				String id = reqObject.getJSONObject(0).getString("id");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getTopic_10Keys(id));
+				out.write(keyService.getTopic_10Keys(id));
+				out.flush();
+				out.close();
+			}
+
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("last_article_3"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserLast(token));
+				out.write(keyService.getUserLast(token));
+				out.flush();
+				out.close();
+				// Last_articleDao last_article_3 = new Last_articleDao();
+				// List_articleBean ub = last_article_3.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getBrowse());
+				// System.out.println(ub.getKey());
+				// System.out.println(ub.getToken());
+				//
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())));
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+			} 
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("last_article_3_doc"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getDocLast(token));
+				out.write(keyService.getDocLast(token));
+				out.flush();
+				out.close();
+			}
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("get_picture"))
+			{
+				ServerSocket server = new ServerSocket(40000);
+				Socket socket = server.accept();
+				DataInputStream dos = new DataInputStream(
+						socket.getInputStream());
+				int len = dos.available();
+				System.out.println("len = " + len);
+				byte[] data = new byte[len];
+				dos.read(data);
+
+				System.out.println("data = " + data);
+				dos.close();
+				socket.close();
+				server.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doctor_list"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				String department = reqObject.getJSONObject(0).getString("department");
+				PrintWriter out = response.getWriter();
+				if(department.equals("妇科")){
+				System.out.println("反馈信息:" + keyService.getUserDoc_fklist(token,department));
+				out.write(keyService.getUserDoc_fklist(token,department));
+				out.flush();
+				out.close();
+				}
+				else if(department.equals("男科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_nklist(token,department));
+					out.write(keyService.getUserDoc_nklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("外科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_wklist(token,department));
+					out.write(keyService.getUserDoc_wklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("内科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_neiklist(token,department));
+					out.write(keyService.getUserDoc_neiklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("皮肤科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_pfklist(token,department));
+					out.write(keyService.getUserDoc_pfklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("骨伤科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_gsklist(token,department));
+					out.write(keyService.getUserDoc_gsklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("精神心理科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_jsxlklist(token,department));
+					out.write(keyService.getUserDoc_jsxlklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("口腔颌面科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_kqhmklist(token,department));
+					out.write(keyService.getUserDoc_kqhmklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("眼科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_yklist(token,department));
+					out.write(keyService.getUserDoc_yklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("耳鼻咽喉科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_ebyhklist(token,department));
+					out.write(keyService.getUserDoc_ebyhklist(token,department));
+					out.flush();
+					out.close();
+				}
+				else if(department.equals("营养科")){
+					System.out.println("反馈信息:" + keyService.getUserDoc_yyklist(token,department));
+					out.write(keyService.getUserDoc_yyklist(token,department));
+					out.flush();
+					out.close();
+				}
+				
+				
+				// Doc_listDao doc_list = new Doc_listDao();
+				// DocBean ub =
+				// doc_list.getUserByName(reqObject.getJSONObject(0)
+				// .getString("token"));
+				//
+				// // System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getPassword());
+				// System.out.println(ub.getName());
+				// System.out.println(ub.getHospital());
+				// System.out.println(ub.getDepartment());
+				// System.out.println(ub.getPosition());
+				// System.out.println(ub.getSex());
+				// System.out.println(ub.getArea());
+				// System.out.println(ub.getToken());
+				//
+				// // Doc_list_numDao doc_list_num = new Doc_list_numDao();
+				// // int rb =
+				// // doc_list_num.getUserByName(reqObject.getJSONObject(0)
+				// // .getString("token"));
+				//
+				// // if(ub.getDepartment() != null&&
+				// //
+				// ub.getDepartment().equals(reqObject.getJSONObject(0).getString("department")))
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("num", 10)
+				// .put("body1",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body4",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body5",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body6",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body7",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body8",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body9",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())).
+				// // put(new JSONObject().
+				// put("body10",
+				// new JSONObject()
+				//
+				// .put("phone", ub.getPhone())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("name", ub.getName())));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} 
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("topic_list"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				//String department = reqObject.getJSONObject(0).getString("department");
+				PrintWriter out = response.getWriter();
+				
+					System.out.println("反馈信息:" + keyService.getTopiclist(token));
+					out.write(keyService.getTopiclist(token));
+					out.flush();
+					out.close();
+				
+		
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("home_news"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String p = top.Token_to_phone(token);
+				UserCheckDao us = new UserCheckDao();
+				int status;
+				int a = us.getUserByName(p);
+				if(a!=1)
+					status=1;
+				//String department = reqObject.getJSONObject(0).getString("department");
+				PrintWriter out = response.getWriter();
+				
+					System.out.println("反馈信息:" + keyService.getHomenewsDao());
+					out.write(keyService.getHomenewsDao());
+					out.flush();
+					out.close();
+				
+		
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("topic_detail"))
+			{
+				String id = reqObject.getJSONObject(0).getString("id");
+				Token_to_phone token_to_phone = new Token_to_phone();
+				String phone = token_to_phone.token_to_phone(reqObject.getJSONObject(0).getString("token"));
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getTopicKeys(id));
+				out.write(keyService.getTopicKeys(id));
+				out.flush();
+				out.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("student_detail"))
+			{
+				
+				
+				User_check user_check = new User_check();
+				List<RgtBean> array = user_check.getUserByName(reqObject.getJSONObject(0).getString("phone"));
+				
+				
+				
+				respObject = new JSONArray().put(new JSONObject()
+				.put("status", 0)
+				.put("phone", array.get(0).getPhone())
+				.put("head", array.get(0).getHead())
+				.put("nickname", array.get(0).getNickname())
+				.put("area", array.get(0).getArea())
+				.put("address", array.get(0).getAddress())
+				.put("school", array.get(0).getSchool())
+				.put("sex", array.get(0).getSex()));
+				
+				
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("disease_detail"))
+			{
+				
+				
+				Disease_check disease_check = new Disease_check();
+				List<Disease_and_guideBean> array = disease_check.getUserByName(Integer.parseInt(reqObject.getJSONObject(0).getString("id")));
+				
+				
+				
+				respObject = new JSONArray().put(new JSONObject()
+				.put("status", 0)
+				.put("id", array.get(0).getId())
+				.put("name", array.get(0).getName())
+				.put("intro", array.get(0).getIntro())
+				.put("part", array.get(0).getPart())
+				.put("cause", array.get(0).getCause())
+				.put("prevent", array.get(0).getPrevent())
+				.put("nurse", array.get(0).getNurse())
+				.put("click", array.get(0).getClick())
+				.put("time", array.get(0).getTime())
+				.put("fre", array.get(0).getFre())
+				.put("pre", array.get(0).getPre())
+				.put("pro", array.get(0).getPro())
+				.put("sta", array.get(0).getSta())
+				
+						);
+				
+				
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doctor_detail"))
+			{
+				Doc_detailDao doc_detail = new Doc_detailDao();
+//				Token_to_phone_doc token_to_phone_doc = new Token_to_phone_doc();
+//				String phone = token_to_phone_doc.token_to_phone(reqObject
+//						.getJSONObject(0).getString("token"));
+				DocBean ub = doc_detail.getUserByName(reqObject
+						.getJSONObject(0).getString("phone"));
+
+				Getdoc_commentDao getdoc_comment = new Getdoc_commentDao();
+				Doc_commentBean commentbean = getdoc_comment.getUserByName(reqObject
+						.getJSONObject(0).getString("phone"));
+				System.out.println(commentbean.getPhone());
+				//System.out.println(commentbean.getHead());
+				System.out.println(commentbean.getContent());
+				System.out.println(commentbean.getTime());
+				
+				Getcomment_3Dao getcomment_3 = new Getcomment_3Dao();
+				List<Doc_commentBean> array = getcomment_3.getUserByName(reqObject
+						.getJSONObject(0).getString("phone"));
+//				Token_to_phone_doc token_to_phone_doc = new Token_to_phone_doc();
+//				String phone = token_to_phone_doc.token_to_phone(reqObject
+//						.getJSONObject(0).getString("token"));
+				Token_to_head to_head = new Token_to_head();
+				String head = to_head.to_head(reqObject
+						.getJSONObject(0).getString("token"));
+				
+//				Phone_to_token phone_to_token = new Phone_to_token();
+//				String token = phone_to_token.to_token(reqObject
+//						.getJSONObject(0).getString("phone"));
+				
+				Select_doc_y_n select_doc = new Select_doc_y_n();
+				int a = select_doc.getUserByName(reqObject
+						.getJSONObject(0).getString("phone"),reqObject
+						.getJSONObject(0).getString("token"));
+				
+				String value = null;
+				if(a==0)
+					value="y";
+				else
+					value="n";
+				
+				// System.out.println(ub.getHead());
+				System.out.println(ub.getName());
+				System.out.println(ub.getHospital());
+				System.out.println(ub.getDepartment());
+				System.out.println(ub.getPosition());
+				System.out.println(ub.getPhone());
+				System.out.println(ub.getToken());
+
+				Token_to_phone token_to_phone = new Token_to_phone();
+				Token_to_head token_to_head = new Token_to_head();
+				
+				if (ub.getPhone() != null
+						&& ub.getPhone().equals(
+								reqObject
+								.getJSONObject(0).getString("phone")))
+				{
+					// respObject = new JSONArray().put(new
+					// JSONObject().put("status",0).put("body", new
+					// JSONObject().put("nickname", "中国")));
+					respObject = new JSONArray().put(new JSONObject()
+							.put("status", 0)
+							.put("phone", ub.getPhone())
+							.put("head", ub.getHead())
+							.put("name", ub.getName())
+							.put("hospital", ub.getHospital())
+							.put("department", ub.getDepartment())
+							.put("position", ub.getPosition())
+							.put("like", value)
+							.put("body1", new JSONObject()
+										.put("phone", token_to_phone.token_to_phone(array.get(0).getToken()))
+										.put("head", token_to_head.to_head(array.get(0).getToken()))
+										.put("content", array.get(0).getContent())
+										.put("time", array.get(0).getTime()))
+							.put("body2", new JSONObject()
+										.put("phone",token_to_phone.token_to_phone(array.get(1).getToken()))
+										.put("head",  token_to_head.to_head(array.get(1).getToken()))
+										.put("content", array.get(1).getContent())
+										.put("time", array.get(1).getTime()))
+							.put("body3", new JSONObject()
+										.put("phone", token_to_phone.token_to_phone(array.get(2).getToken()))
+										.put("head",  token_to_head.to_head(array.get(2).getToken()))
+										.put("content", array.get(2).getContent())
+										.put("time", array.get(2).getTime())));
+							
+//							.put("body1",
+//									new JSONObject()
+//
+//											.put("name", ub.getName())
+//											.put("hospital", ub.getHospital())
+//											.put("department",
+//													ub.getDepartment())
+//											.put("position", ub.getPosition())
+//											.put("phone", ub.getPhone())).
+//
+//							// put(new JSONObject().
+//							put("body2",
+//									new JSONObject()
+//
+//											.put("name", ub.getName())
+//											.put("hospital", ub.getHospital())
+//											.put("department",
+//													ub.getDepartment())
+//											.put("position", ub.getPosition())
+//											.put("phone", ub.getPhone())).
+//
+//							// put(new JSONObject().
+//							put("body3",
+//									new JSONObject()
+//
+//											.put("name", ub.getName())
+//											.put("hospital", ub.getHospital())
+//											.put("department",
+//													ub.getDepartment())
+//											.put("position", ub.getPosition())
+//											.put("phone", ub.getPhone())));
+
+				} else
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("disease"))
+			{
+				String name1 = reqObject.getJSONObject(0).getString("name");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserDisease(name1));
+				out.write(keyService.getUserDisease(name1));
+				out.flush();
+				out.close();
+				// DiseaseDao disease = new DiseaseDao();
+				// DiseaseBean ub =
+				// disease.getUserByName(reqObject.getJSONObject(
+				// 0).getString("name"));
+				//
+				// System.out.println(ub.getIntro());
+				// System.out.println(ub.getPart());
+				// System.out.println(ub.getCause());
+				// System.out.println(ub.getPrevent());
+				// System.out.println(ub.getNurse());
+				// System.out.println(ub.getClick());
+				//
+				// if ((ub).getName() != null
+				// && (ub).getName().equals(
+				// reqObject.getJSONObject(0).getString("name"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject()
+				// .put("intro", ub.getIntro())
+				// .put("part", ub.getPart())
+				// .put("cause", ub.getCause())
+				// .put("prevent", ub.getPrevent())
+				// .put("nurse", ub.getNurse()))
+				// .put("click", ub.getClick())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("intro", ub.getIntro())
+				// .put("part", ub.getPart())
+				// .put("cause", ub.getCause())
+				// .put("prevent", ub.getPrevent())
+				// .put("nurse", ub.getNurse()))
+				// .put("click", ub.getClick()).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("intro", ub.getIntro())
+				// .put("part", ub.getPart())
+				// .put("cause", ub.getCause())
+				// .put("prevent", ub.getPrevent())
+				// .put("nurse", ub.getNurse())
+				// .put("click", ub.getClick())));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("guide"))
+			{
+				String name1 = reqObject.getJSONObject(0).getString("name");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserGuide(name1));
+				out.write(keyService.getUserGuide(name1));
+				out.flush();
+				out.close();
+				// GuideDao guide = new GuideDao();
+				// GuideBean ub = guide.getUserByName(reqObject.getJSONObject(0)
+				// .getString("name"));
+				//
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getFre());
+				// System.out.println(ub.getPre());
+				// System.out.println(ub.getPro());
+				// System.out.println(ub.getSta());
+				//
+				// if ((ub).getName() != null
+				// && (ub).getName().equals(
+				// reqObject.getJSONObject(0).getString("name"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("time", ub.getTime())
+				// .put("fre", ub.getFre())
+				// .put("pre", ub.getPre())
+				// .put("pro", ub.getPro())
+				// .put("sta", ub.getSta())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject().put("time", ub.getTime())
+				// .put("fre", ub.getFre())
+				// .put("pre", ub.getPre())
+				// .put("pro", ub.getPro())
+				// .put("sta", ub.getSta())).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject().put("time", ub.getTime())
+				// .put("fre", ub.getFre())
+				// .put("pre", ub.getPre())
+				// .put("pro", ub.getPro())
+				// .put("sta", ub.getSta())));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("symptom"))
+			{
+				String symid = reqObject.getJSONObject(0).getString("symid");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserSymptom(Integer.parseInt(symid)));
+				out.write(keyService.getUserSymptom(Integer.parseInt(symid)));
+				out.flush();
+				out.close();
+				// SymptomDao symptom = new SymptomDao();
+				// SymptomBean ub =
+				// symptom.getUserByName(reqObject.getJSONObject(
+				// 0).getString("symid"));
+				//
+				// System.out.println(ub.getName());
+				// // System.out.println(ub.getString(2));
+				// // System.out.println(ub.getString(3));
+				// // System.out.println(ub.getString(4));
+				// // System.out.println(ub.getString(5));
+				//
+				// if ((ub).getSymid() != 0
+				// && (ub).getSymid() == (reqObject.getJSONObject(0)
+				// .getInt("symid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("department"))
+			{
+				String depid = reqObject.getJSONObject(0).getString("depid");
+				PrintWriter out = response.getWriter();
+				System.out
+						.println("反馈信息:"
+								+ keyService.getUserDepartment(Integer
+										.parseInt(depid)));
+				out.write(keyService.getUserDepartment(Integer.parseInt(depid)));
+				out.flush();
+				out.close();
+				// DepartmentDao department = new DepartmentDao();
+				// DepartmentBean ub =
+				// department.getUserByName(Integer.parseInt(reqObject
+				// .getJSONObject(0).getString("depid")));
+				//
+				// System.out.println(ub.getName());
+				// // System.out.println(ub.getString(2));
+				// // System.out.println(ub.getString(3));
+				// // System.out.println(ub.getString(4));
+				// // System.out.println(ub.getString(5));
+				//
+				// if ((ub).getDepid() != 0
+				// && (ub).getDepid() == (reqObject.getJSONObject(0)
+				// .getInt("depid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+				// } else if (reqObject.getJSONObject(0).getString("action")
+				// .equals("article")) {
+				// ArticleDao article = new ArticleDao();
+				// ArticleBean ub = article.getUserByName(Integer
+				// .parseInt(reqObject2.getJSONObject(0).getString("id")));
+				//
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getSource());
+				// System.out.println(ub.getDate());
+				// System.out.println(ub.getArticle());
+				// System.out.println(ub.getClick());
+				//
+				// UpdatefocusDao updatefocus = new UpdatefocusDao();
+				// int
+				// a=updatefocus.getUserByName(reqObject.getJSONObject(0).getString("id"));
+				//
+				//
+				// // String c=(ub).getId()+"";
+				// // String c = Integer.parseInt("key");
+				// if ((ub).getId() != 0
+				// && (ub).getId() == Integer.parseInt(reqObject
+				// .getJSONObject(0).getString(""))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 0).put(
+				// "body",
+				// new JSONObject().put("title", ub.getTitle())
+				// .put("source", ub.getSource())
+				// .put("date", ub.getDate())
+				// .put("article", ub.getArticle())
+				// .put("click", a)));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("comment_commit_doc"))
+			{
+				Comment_commitDao comment_commit = new Comment_commitDao();
+				int ub = comment_commit.getUserByName(
+						reqObject2.getJSONObject(0).getString("content"),
+						reqObject2.getJSONObject(0).getString("token"),
+						reqObject2.getJSONObject(0).getInt("id"), reqObject2
+								.getJSONObject(0).getString("date"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									);
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("comment_commit"))
+			{
+				Comment_commitDao comment_commit = new Comment_commitDao();
+				int ub = comment_commit.getUserByName(
+						reqObject2.getJSONObject(0).getString("content"),
+						reqObject2.getJSONObject(0).getString("token"),
+						reqObject2.getJSONObject(0).getInt("id"), reqObject2
+								.getJSONObject(0).getString("date"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									.put("token",
+											reqObject2.getJSONObject(0)
+													.getString("token"))
+									.put("content",
+											reqObject2.getJSONObject(0)
+													.getString("content"))
+									.put("date",
+											reqObject2.getJSONObject(0)
+													.getString("date"))
+									.put("id",
+											reqObject2.getJSONObject(0).getInt(
+													"id")));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("topic_comment_commit"))
+			{
+				Topic_comment_commitDao topic_comment_commit = new Topic_comment_commitDao();
+				int ub = topic_comment_commit.getUserByName(
+						reqObject2.getJSONObject(0).getInt("id"),
+						reqObject2.getJSONObject(0).getString("token"),
+						reqObject2.getJSONObject(0).getString("content"), reqObject2
+								.getJSONObject(0).getString("time"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+//									.put("token",
+//											reqObject2.getJSONObject(0)
+//													.getString("token"))
+//									.put("content",
+//											reqObject2.getJSONObject(0)
+//													.getString("content"))
+//									.put("date",
+//											reqObject2.getJSONObject(0)
+//													.getString("date"))
+//									.put("id",
+//											reqObject2.getJSONObject(0).getInt(
+//													"id"))
+													);
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("create_topic"))
+			{
+				Create_topicDao create_topic = new Create_topicDao();
+				int ub = create_topic.getUserByName(
+						reqObject2.getJSONObject(0).getString("head"),
+						reqObject2.getJSONObject(0).getString("title"),
+						reqObject2.getJSONObject(0).getString("content"), reqObject2
+								.getJSONObject(0).getString("time"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									.put("head",
+											reqObject2.getJSONObject(0)
+													.getString("head"))
+									.put("title",
+											reqObject2.getJSONObject(0)
+													.getString("title"))
+									.put("content",
+											reqObject2.getJSONObject(0)
+													.getString("content"))
+									.put("time",
+											reqObject2.getJSONObject(0).getString(
+													"time"))
+									.put("token",
+											reqObject2.getJSONObject(0).getString(
+													"token"))				
+													);
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("complaint_commit"))
+			{
+				//Comment_commitDao comment_commit = new Comment_commitDao();
+				Complaint_commitDao complaint_commit = new Complaint_commitDao();
+				int ub = complaint_commit.getUserByName(
+						reqObject2.getJSONObject(0).getString("content"),
+						reqObject2.getJSONObject(0).getString("date"), reqObject2
+								.getJSONObject(0).getString("token"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									
+									);
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doc_commit"))
+			{
+				Comment_doc_commitDao comment_doc_commit = new Comment_doc_commitDao();
+				int ub = comment_doc_commit.getUserByName(
+						reqObject2.getJSONObject(0).getString("content"),
+						reqObject2.getJSONObject(0).getString("phone"),
+						reqObject2.getJSONObject(0).getString("time"), reqObject2
+								.getJSONObject(0).getString("token"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									.put("phone",
+											reqObject2.getJSONObject(0)
+													.getString("phone"))
+									.put("content",
+											reqObject2.getJSONObject(0)
+													.getString("content"))
+									.put("time",
+											reqObject2.getJSONObject(0)
+													.getString("time"))
+									.put("token",
+											reqObject2.getJSONObject(0).getInt(
+													"token")));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("like_commit_doc"))
+			{
+
+				if (reqObject.getJSONObject(0).getString("like").equals("y"))
+				{
+//					Token_to_phone token_to_phone = new Token_to_phone();
+//					String phone=token_to_phone.token_to_phone(reqObject2.getJSONObject(0)
+//							.getString("token"));
+					Doc_collectionDao doc_collection = new Doc_collectionDao();
+					int ub = doc_collection.getUserByName(reqObject2.getJSONObject(0)
+							.getString("phone"),reqObject2.getJSONObject(0)
+							.getString("token"));
+
+					// System.out.println(ub.getHead());
+					// System.out.println(ub.getPhone());
+					// System.out.println(ub.getContent());
+					// System.out.println(ub.getTime());
+					// System.out.println(ub.getToken());
+					// System.out.println(ub.getKey());
+
+					// String c=(ub).getId()+"";
+					// String c = Integer.parseInt("key");
+					if (ub == 1)
+					{
+						respObject = new JSONArray().put(new JSONObject()
+								.put("status", 0)
+//								.put("phone",
+//										reqObject2.getJSONObject(0)
+//										.getString("phone"))
+//								.put("token",
+//										reqObject2.getJSONObject(0).getString(
+//												"token"))
+												);
+					} else
+					{
+						respObject = new JSONArray().put(new JSONObject().put(
+								"status", 1));
+					}
+				} else if (reqObject.getJSONObject(0).getString("like")
+						.equals("n"))
+				{
+//					Token_to_phone token_to_phone = new Token_to_phone();
+//					String phone = token_to_phone.token_to_phone(reqObject2.getJSONObject(0).getString(
+//									"token"));
+					Doc_deleteDao doc_delete = new Doc_deleteDao();
+					int ub = doc_delete.getUserByName((reqObject2.getJSONObject(0).getString(
+									"phone")),(reqObject2.getJSONObject(0).getString(
+											"token")));
+					if (ub == 1)
+					{
+						respObject = new JSONArray().put(new JSONObject()
+								.put("status", 0)
+//								.put("phone",
+//										reqObject2.getJSONObject(0).getString(
+//												"phone"))
+//								.put("token",
+//										reqObject2.getJSONObject(0).getString(
+//												"token"))
+												);
+					} else
+					{
+						respObject = new JSONArray().put(new JSONObject().put(
+								"status", 1));
+					}
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("symarti"))
+			{
+				String s_sid = reqObject.getJSONObject(0).getString("s_sid");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserSymarti(Integer.parseInt(s_sid)));
+				out.write(keyService.getUserSymarti(Integer.parseInt(s_sid)));
+				out.flush();
+				out.close();
+				// SymartiDao symarti = new SymartiDao();
+				// SymartiBean ub =
+				// symarti.getUserByName(reqObject.getJSONObject(
+				// 0).getString("s_sid"));
+				//
+				// System.out.println(ub.getS_aid());
+				// // System.out.println(ub.getSource());
+				// // System.out.println(ub.getDate());
+				// // System.out.println(ub.getArticle());
+				//
+				// if ((ub).getS_sid() != 0
+				// && (ub).getS_sid() == (reqObject.getJSONObject(0)
+				// .getInt("s_sid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("s_aid",
+				// ub.getS_aid())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("s_aid",
+				// ub.getS_aid())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("s_aid",
+				// ub.getS_aid())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("disarti"))
+			{
+				String s_name = reqObject.getJSONObject(0).getString("s_name");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserDisarti(s_name));
+				out.write(keyService.getUserDisarti(s_name));
+				out.flush();
+				out.close();
+				// DisartiDao disarti = new DisartiDao();
+				// DisartiBean ub =
+				// disarti.getUserByName(reqObject.getJSONObject(
+				// 0).getString("s_name"));
+				//
+				// System.out.println(ub.getS_aid());
+				// // System.out.println(ub.getSource());
+				// // System.out.println(ub.getDate());
+				// // System.out.println(ub.getArticle());
+				//
+				// if ((ub).getS_name() != null
+				// && (ub).getS_name().equals(
+				// reqObject.getJSONObject(0).getString("s_sid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("s_aid",
+				// ub.getS_aid())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("s_aid",
+				// ub.getS_aid())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("s_aid",
+				// ub.getS_aid())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("departi"))
+			{
+				String s_depid = reqObject.getJSONObject(0)
+						.getString("s_depid");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserDeparti(Integer.parseInt(s_depid)));
+				out.write(keyService.getUserDeparti(Integer.parseInt(s_depid)));
+				out.flush();
+				out.close();
+				// DepartiDao departi = new DepartiDao();
+				// DepartiBean ub =
+				// departi.getUserByName(Integer.parseInt(reqObject.getJSONObject(
+				// 0).getString("s_depid")));
+				//
+				// System.out.println(ub.getS_aid());
+				// // System.out.println(ub.getSource());
+				// // System.out.println(ub.getDate());
+				// // System.out.println(ub.getArticle());
+				//
+				// if ((ub).getS_depid() != 0
+				// && (ub).getS_depid() == (reqObject.getJSONObject(0)
+				// .getInt("s_depid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("s_aid",
+				// ub.getS_aid())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("s_aid",
+				// ub.getS_aid())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("s_aid",
+				// ub.getS_aid())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("symdis"))
+			{
+				String s_id = reqObject.getJSONObject(0).getString("s_id");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserSymdis(Integer.parseInt(s_id)));
+				out.write(keyService.getUserSymdis(Integer.parseInt(s_id)));
+				out.flush();
+				out.close();
+				// SymdisDao symdis = new SymdisDao();
+				// SymdisBean ub =
+				// symdis.getUserByName(reqObject.getJSONObject(0)
+				// .getString("s_id"));
+				//
+				// System.out.println(ub.getName());
+				// // System.out.println(ub.getSource());
+				// // System.out.println(ub.getDate());
+				// // System.out.println(ub.getArticle());
+				//
+				// if ((ub).getS_id() != 0
+				// && (ub).getS_id() == (reqObject.getJSONObject(0)
+				// .getInt("s_depid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("depdis"))
+			{
+				String s_id = reqObject.getJSONObject(0).getString("s_id");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserDepdis(Integer.parseInt(s_id)));
+				out.write(keyService.getUserDepdis(Integer.parseInt(s_id)));
+				out.flush();
+				out.close();
+				// SymdisDao symdis = new SymdisDao();
+				// SymdisBean ub =
+				// symdis.getUserByName(reqObject.getJSONObject(0)
+				// .getString("s_id"));
+				//
+				// System.out.println(ub.getName());
+				// // System.out.println(ub.getSource());
+				// // System.out.println(ub.getDate());
+				// // System.out.println(ub.getArticle());
+				//
+				// if ((ub).getS_id() != 0
+				// && (ub).getS_id() == (reqObject.getJSONObject(0)
+				// .getInt("s_depid"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject().put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())
+				// .
+				//
+				// // put(new
+				// // JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("name",
+				// ub.getName())))));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			}
+//			 else if (reqObject.getJSONObject(0).getString("action")
+//			 .equals("comment_get")) {
+//			
+//			 GetcommentlotDao getcommentDao = new GetcommentlotDao();
+//			 List<Key> ub =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(0).
+//			 getString("id")));
+//			 // GetcommentDao getcommentDao = new GetcommentDao();
+//			 // CommentBean ub =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString("id")));
+//			 // CommentBean ub1 =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString((Integer.parseInt("id")+1)+"")));
+//			 // CommentBean ub2 =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString((Integer.parseInt("id")+2)+"")));
+//			 // CommentBean ub3 =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString((Integer.parseInt("id")+3)+"")));
+//			 // CommentBean ub4 =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString((Integer.parseInt("id")+4)+"")));
+//			 // CommentBean ub5 =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString((Integer.parseInt("id")+5)+"")));
+//			 // CommentBean ub6 =
+//			 getcommentDao.getUserByName(Integer.parseInt(reqObject2.getJSONObject(
+//			 // 0).getString((Integer.parseInt("id")+1)+"")));
+//			 // System.out.println(ub.getHead());
+//			 // System.out.println(ub.getPhone());
+//			 // System.out.println(ub.getContent());
+//			 // System.out.println(ub.getToken());
+//			 // System.out.println(ub.getId());
+//			 // System.out.println(ub.getDate());
+//			
+//			 // Getcomment_numDao getcomment_numDao = new Getcomment_numDao();
+//			 // int nb = getcomment_numDao.getUserByName(reqObject
+//			 // .getJSONObject(0).getString("token"));
+//			
+//			 if (ub.getId() != 0
+//			 && ub.getId()==(
+//			 reqObject.getJSONObject(0).getInt("id"))) {
+//			 // respObject = new JSONArray().put(new
+//			 // JSONObject().put("status",0).put("body", new
+//			 // JSONObject().put("nickname", "中国")));
+//			 respObject = new JSONArray().put(
+//			 new JSONObject().put("status", 0).put("num", 10)
+//			
+//			
+//			 .put("body1",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 // put(new JSONObject().
+//			 put("body2",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body3",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body4",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body5",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body6",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body7",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body8",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 put("body9",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())).
+//			
+//			 // put(new JSONObject().
+//			 put("body10",
+//			 new JSONObject().put("head", ub.getHead())
+//			 .put("phone", ub.getPhone())
+//			 .put("content", ub.getContent())
+//			 .put("id", ub.getId())
+//			 .put("date", ub.getDate())));
+//			 } else
+//			 respObject = new JSONArray().put(new JSONObject().put(
+//			 "status", 1));
+//			 }
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("article_detail"))
+			{
+				ArticleDao article = new ArticleDao();
+				ArticleBean ub = article.getUserByName(Integer
+						.parseInt(reqObject2.getJSONObject(0).getString("id")));
+
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getSource());
+				// System.out.println(ub.getDate());
+				// System.out.println(ub.getArticle());
+				// System.out.println(ub.getClick());
+				// System.out.println(ub.getComment());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getId());
+
+				// System.out.println(((ResultSet) ub).getString(1));
+				// System.out.println(((ResultSet) ub).getString(2));
+
+				GetcommentDao gd = new GetcommentDao();
+				CommentBean cb = gd.getUserByName(Integer.parseInt(reqObject2
+						.getJSONObject(0).getString("id")));
+				System.out.println(cb.getPhone());
+				System.out.println(cb.getContent());
+				System.out.println(cb.getId());
+				System.out.println(cb.getDate());
+
+				// LoginDao registDao = new LoginDao();
+				// RegistBean rb = registDao.getUserByName(reqObject2
+				// .getJSONObject(0).getString("phone"));
+				//
+				// String C = rb.getPhone() + rb.getPassword();
+				//
+				// GetcommentDao getcomment = new GetcommentDao();
+				// CommentBean comment =
+				// getcomment.getUserByName(reqObject.getJSONObject(0).getString("token"));
+				//
+
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getDate());
+				// System.out.println(ub.getSource());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getArticle());
+				// System.out.println(ub.getComment());
+				// System.out.println(ub.getKey());
+				// System.out.println(C);
+
+				// System.out.println(comment.getHead());
+				// System.out.println(comment.getPhone());
+				// System.out.println(comment.getContent());
+				// System.out.println(comment.getTime());
+
+				// Getcomment_numDao getcomment_numDao = new
+				// Getcomment_numDao();
+				// int nb = getcomment_numDao.getUserByName(reqObject
+				// .getJSONObject(0).getString("key"));
+
+				UpdatefocusDao updatefocus = new UpdatefocusDao();
+				int a = updatefocus.getUserByName(reqObject.getJSONObject(0)
+						.getString("id"));
+				Select_y_nDao select_y_n = new Select_y_nDao();
+				Token_to_phone token_to_phone = new Token_to_phone();
+				Token_to_head to_head = new Token_to_head();
+				String head = to_head.to_head(reqObject.getJSONObject(0)
+						.getString("token"));
+				String phone = token_to_phone.token_to_phone(reqObject.getJSONObject(0)
+						.getString("token"));
+				int b = select_y_n.getUserByName(phone,Integer.parseInt(reqObject
+						.getJSONObject(0).getString("id")));
+				Check_id check_id = new Check_id();
+				int c = check_id.getUserByName(reqObject
+								.getJSONObject(0).getString("id"));
+				String value=null;
+				if(b==1)
+				{
+					value="y";
+				}
+				else
+				{
+					value="n";
+				}
+
+				if ((ub).getId() != 0
+						&& (ub).getId() == Integer.parseInt(reqObject
+								.getJSONObject(0).getString("id")))
+				{
+					// respObject = new JSONArray().put(new
+					// JSONObject().put("status",0).put("body", new
+					// JSONObject().put("nickname", "中国")));
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									.put("body",
+											new JSONObject()
+													.put("title", ub.getName())
+													.put("source",
+															ub.getSource())
+													.put("date", ub.getDate())
+													.put("article",
+															ub.getArticle())
+													.put("click", a)
+													.put("id", ub.getId())
+													.put("like", value)
+//													.put("token", ub.getToken())
+													.put("kind", ub.getKind())
+													.put("comment",
+															new JSONObject()
+																	.put("head",
+																			head)
+																	.put("phone",
+																			cb.getPhone())
+																	.put("content",
+																			cb.getContent())
+																	.put("date",
+																			cb.getDate()))));
+
+					// // put(new JSONObject().
+					// put("body2",
+					// new JSONObject()
+					// .put("title", ub.getTitle())
+					// .put("date", ub.getDate())
+					// .put("source", ub.getSource())
+					// .put("kind", ub.getKind())
+					// .put("article", ub.getArticle())
+					// .put("comment", ub.getComment())).
+					//
+					// // put(new JSONObject().
+					// put("body3",
+					// new JSONObject()
+					// .put("title", ub.getTitle())
+					// .put("date", ub.getDate())
+					// .put("source", ub.getSource())
+					// .put("kind", ub.getKind())
+					// .put("article", ub.getArticle())
+					// .put("comment", ub.getComment())
+
+				} else if(c==0)
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				else 
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 2));
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("judge_get"))
+			{
+				String phone = reqObject.getJSONObject(0).getString("phone");
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserGetjudge(phone,token));
+				out.write(keyService.getUserGetjudge(phone,token));
+				out.flush();
+				out.close();
+				// GetjudgeDao getjudgeDao = new GetjudgeDao();
+				// JudgeBean ub = getjudgeDao.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getToken());
+				//
+				// Judge_get_numDao judge_get_num = new Judge_get_numDao();
+				// int rb =
+				// judge_get_num.getUserByName(reqObject.getJSONObject(0)
+				// .getString("token"));
+				//
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("num", rb)
+				// .put("body1",
+				// new JSONObject().put("phone",
+				// ub.getPhone()).put(
+				// "content", ub.getContent()))
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject().put("phone",
+				// ub.getPhone()).put(
+				// "content", ub.getContent()))
+				// .
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject().put("phone",
+				// ub.getPhone()).put(
+				// "content", ub.getContent())));
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("last_article_10"))
+			{
+
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserLast_10(token));
+				out.write(keyService.getUserLast_10(token));
+				out.flush();
+				out.close();
+				// Last_articleDao last_article_10 = new Last_articleDao();
+				// List_articleBean ub = last_article_10.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getBrowse());
+				// System.out.println(ub.getKey());
+				// System.out.println(ub.getToken());
+				//
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("num", 10)
+				// .put("body1",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body4",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body5",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body6",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body7",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body8",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body9",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body10",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())));
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+			} 
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("last_article_10_doc"))
+			{
+
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getDocLast_10(token));
+				out.write(keyService.getDocLast_10(token));
+				out.flush();
+				out.close();
+			}
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("hot_article_3"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserHot(token));
+				out.write(keyService.getUserHot(token));
+				out.flush();
+				out.close();
+				// Last_articleDao last_article_10 = new Last_articleDao();
+				// List_articleBean ub = last_article_10.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getBrowse());
+				// System.out.println(ub.getKey());
+				// System.out.println(ub.getToken());
+				//
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("num", 10)
+				// .put("body1",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())));
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+			} 
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("hot_article_3_doc"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getDocHot(token));
+				out.write(keyService.getDocHot(token));
+				out.flush();
+				out.close();
+			}
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("hot_article_10"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getUserHot_10(token));
+				out.write(keyService.getUserHot_10(token));
+				out.flush();
+				out.close();
+				// Last_articleDao last_article_10 = new Last_articleDao();
+				// List_articleBean ub = last_article_10.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getBrowse());
+				// System.out.println(ub.getKey());
+				// System.out.println(ub.getToken());
+				//
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("num", 10)
+				// .put("body1",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body4",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body5",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body6",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body7",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body8",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body9",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())).
+				//
+				// // put(new JSONObject().
+				// put("body10",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("kind", ub.getKind())
+				// .put("browse", ub.getBrowse())
+				// .put("id", ub.getKey())));
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+			} 
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("search"))
+			{
+//				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String phone = top.Token_to_phone(reqObject.getJSONObject(0).getString("token"));
+				UserCheckDao uc = new UserCheckDao();
+				int status;
+				int a=uc.getUserByName(phone);
+				if(a!=1)
+					status=1;
+				PrintWriter out = response.getWriter();
+				String keyword = reqObject.getJSONObject(0).getString("keyword");
+				//System.out.println("反馈信息:" + keyService.getUserHot_10(token));
+				System.out.println("反馈信息:" + keyService.getSearchDao(keyword));
+				//out.write(keyService.getUserHot_10(token));
+				out.write(keyService.getSearchDao(keyword));
+				out.flush();
+				out.close();
+			
+			} 
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("news_classify"))
+			{
+//				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				String phone = top.Token_to_phone(reqObject.getJSONObject(0).getString("token"));
+				UserCheckDao uc = new UserCheckDao();
+				int status;
+				int a=uc.getUserByName(phone);
+				if(a!=1)
+					status=1;
+				PrintWriter out = response.getWriter();
+				String classify = reqObject.getJSONObject(0).getString("classify");
+				//System.out.println("反馈信息:" + keyService.getUserHot_10(token));
+				System.out.println("反馈信息:" + keyService.getSearchDao(classify));
+				//out.write(keyService.getUserHot_10(token));
+				out.write(keyService.getSearchDao(classify));
+				out.flush();
+				out.close();
+			
+			} 
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("like_check"))
+			{
+//				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				
+				String phone = top.Token_to_phone(reqObject.getJSONObject(0).getString("token"));
+				PrintWriter out = response.getWriter();
+				//System.out.println("反馈信息:" + keyService.getUserHot_10(token));
+				System.out.println("反馈信息:" + keyService.getNewsAll(phone));
+				//out.write(keyService.getUserHot_10(token));
+				out.write(keyService.getNewsAll(phone));
+				out.flush();
+				out.close();
+			
+			} 
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("collection_check"))
+			{
+//				String token = reqObject.getJSONObject(0).getString("token");
+				Token_to_phone_new top = new Token_to_phone_new();
+				
+				String phone = top.Token_to_phone(reqObject.getJSONObject(0).getString("token"));
+				CollectionCheckDao ccd = new CollectionCheckDao();
+				int a = ccd.getUserByName(phone, reqObject.getJSONObject(0).getString("url"));
+				if (a == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject()
+							.put("status", 0).put("like", "y"));
+					respMessage = respObject == null ? "" : respObject.toString();
+					System.out.println("反馈信息:" + respMessage);
+					PrintWriter pw = response.getWriter();
+					pw.write(respMessage);
+					pw.flush();
+					pw.close();
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0).put("like", "n"));
+					respMessage = respObject == null ? "" : respObject.toString();
+					System.out.println("反馈信息:" + respMessage);
+					PrintWriter pw = response.getWriter();
+					pw.write(respMessage);
+					pw.flush();
+					pw.close();
+				}
+				
+			
+			} 
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("hot_article_10_doc"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:" + keyService.getDocHot_10(token));
+				out.write(keyService.getDocHot_10(token));
+				out.flush();
+				out.close();
+			}
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("article_like"))
+			{
+				Token_to_phone token_to_phone = new Token_to_phone();
+				
+				String phone = token_to_phone.token_to_phone(reqObject.getJSONObject(0).getString("token"));
+				//String id = reqObject.getJSONObject(0).getString("id");
+				PrintWriter out = response.getWriter();
+				System.out
+						.println("反馈信息:" + keyService.getUserCheck(phone));
+				out.write(keyService.getUserCheck(phone));
+				out.flush();
+				out.close();
+				// Article_checkDao aeticle_check = new Article_checkDao();
+				// Detail_articleBean ub =
+				// aeticle_check.getUserByName(reqObject2
+				// .getJSONObject(0).getString("token"));
+				//
+				// System.out.println(ub.getTitle());
+				// System.out.println(ub.getDate());
+				// System.out.println(ub.getSource());
+				// System.out.println(ub.getKind());
+				// System.out.println(ub.getArticle());
+				// System.out.println(ub.getComment());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getId());
+				//
+				// GetcommentDao getcommentDao = new GetcommentDao();
+				// CommentBean cb = getcommentDao.getUserByName(Integer
+				// .parseInt(reqObject2.getJSONObject(0).getString("id")));
+				//
+				// System.out.println(cb.getHead());
+				// System.out.println(cb.getPhone());
+				// System.out.println(cb.getContent());
+				// System.out.println(cb.getToken());
+				// System.out.println(cb.getId());
+				// System.out.println(cb.getDate());
+				//
+				// if (ub.getId() != 0
+				// && ub.getId() == (reqObject.getJSONObject(0)
+				// .getInt("Id"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray()
+				// .put(new JSONObject()
+				// .put("status", 0)
+				// .put("body1",
+				// new JSONObject()
+				// .put("title", ub.getTitle())
+				// .put("date", ub.getDate())
+				// .put("source",
+				// ub.getSource())
+				// .put("kind", ub.getKind())
+				// .put("article",
+				// ub.getArticle())
+				// .put("comment",
+				// new JSONObject()
+				// .put("head",
+				// cb.getHead())
+				// .put("phone",
+				// cb.getPhone())
+				// .put("content",
+				// cb.getContent())
+				// .put("date",
+				// cb.getDate()))
+				// .put("token", ub.getToken())
+				// .put("id", ub.getId())));
+				//
+				// // //put(new JSONObject().
+				// // put("body2", new JSONObject().put("title",ub.getTitle()).
+				// // put("date", ub.getDate()).
+				// // put("source", ub.getSource()).
+				// // put("kind", ub.getKind()).
+				// // put("article", ub.getArticle()).
+				// // put("comment", ub.getComment())).
+				//
+				// //
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			}
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doc_like_commit"))
+			{
+
+				if (reqObject.getJSONObject(0).getString("like").equals("y"))
+				{
+					Token_to_phone_doc token_to_phone_doc = new Token_to_phone_doc();
+					String phone=token_to_phone_doc.token_to_phone_doc(reqObject.getJSONObject(0)
+							.getString("token"));
+					Article_collectionDao article_collection = new Article_collectionDao();
+					int ub = article_collection.getUserByName(phone,Integer
+							.parseInt(reqObject.getJSONObject(0).getString(
+									"id")));
+
+					// System.out.println(ub.getHead());
+					// System.out.println(ub.getPhone());
+					// System.out.println(ub.getContent());
+					// System.out.println(ub.getTime());
+					// System.out.println(ub.getToken());
+					// System.out.println(ub.getKey());
+
+					// String c=(ub).getId()+"";
+					// String c = Integer.parseInt("key");
+					if (ub == 1)
+					{
+						respObject = new JSONArray().put(new JSONObject()
+								.put("status", 0)
+//								.put("phone",
+//										phone)
+//								.put("id",
+//										reqObject2.getJSONObject(0).getString(
+//												"id")
+												);
+					} else
+					{
+						respObject = new JSONArray().put(new JSONObject().put(
+								"status", 1));
+					}
+
+			}}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("like_commit"))
+			{
+
+				if (reqObject.getJSONObject(0).getString("like").equals("y"))
+				{
+//					Token_to_phone token_to_phone = new Token_to_phone();
+//					String phone=token_to_phone.token_to_phone(reqObject2.getJSONObject(0)
+//							.getString("token"));
+//					Article_collectionDao article_collection = new Article_collectionDao();
+//					int ub = article_collection.getUserByName(phone,Integer
+//							.parseInt(reqObject2.getJSONObject(0).getString(
+//									"id")));
+					
+					Token_to_phone_new top = new Token_to_phone_new();
+					String to = top.Token_to_phone(reqObject2.getJSONObject(0).getString("token"));
+
+					NewsCollectionDao newscollection = new NewsCollectionDao();
+					int ub = newscollection.getUserByName(to, reqObject2.getJSONObject(0).getString("url"));
+					
+					// System.out.println(ub.getHead());
+					// System.out.println(ub.getPhone());
+					// System.out.println(ub.getContent());
+					// System.out.println(ub.getTime());
+					// System.out.println(ub.getToken());
+					// System.out.println(ub.getKey());
+
+					// String c=(ub).getId()+"";
+					// String c = Integer.parseInt("key");
+					if (ub == 1)
+					{
+						respObject = new JSONArray().put(new JSONObject()
+								.put("status", 0)
+//								.put("phone",
+//										phone)
+//								.put("id",
+//										reqObject2.getJSONObject(0).getString(
+//												"id"))
+												);
+						respMessage = respObject == null ? "" : respObject.toString();
+						System.out.println("反馈信息:" + respMessage);
+						PrintWriter pw = response.getWriter();
+						pw.write(respMessage);
+						pw.flush();
+						pw.close();
+					} else
+					{
+						respObject = new JSONArray().put(new JSONObject().put(
+								"status", 1));
+						respMessage = respObject == null ? "" : respObject.toString();
+						System.out.println("反馈信息:" + respMessage);
+						PrintWriter pw = response.getWriter();
+						pw.write(respMessage);
+						pw.flush();
+						pw.close();
+					}
+					
+				}
+					else if (reqObject.getJSONObject(0).getString("like")
+							.equals("n"))
+					{
+//						Token_to_phone token_to_phone = new Token_to_phone();
+//						String phone = token_to_phone.token_to_phone(reqObject2.getJSONObject(0).getString(
+//										"token"));
+//						Token_to_phone token_to_phone = new Token_to_phone();
+//						String phone = token_to_phone.token_to_phone(reqObject2.getJSONObject(0).getString(
+//								"token"));
+//						Article_deleteDao article_delete = new Article_deleteDao();
+//						int ub = article_delete.getUserByName(phone,Integer.parseInt(reqObject2.getJSONObject(0).getString(
+//												"id")));
+						Token_to_phone_new top = new Token_to_phone_new();
+						String tok = top.Token_to_phone(reqObject.getJSONObject(0).getString(
+								"token"));
+						News_deleteDao nd = new News_deleteDao();
+						int ub = nd.getUserByName(tok, reqObject.getJSONObject(0).getString(
+								"url"));
+						if (ub == 1)
+						{
+							respObject = new JSONArray().put(new JSONObject()
+									.put("status", 0));
+							respMessage = respObject == null ? "" : respObject.toString();
+							System.out.println("反馈信息:" + respMessage);
+							PrintWriter pw = response.getWriter();
+							pw.write(respMessage);
+							pw.flush();
+							pw.close();
+						} else
+						{
+							respObject = new JSONArray().put(new JSONObject().put(
+									"status", 1));
+							respMessage = respObject == null ? "" : respObject.toString();
+							System.out.println("反馈信息:" + respMessage);
+							PrintWriter pw = response.getWriter();
+							pw.write(respMessage);
+							pw.flush();
+							pw.close();
+						}
+						
+					}
+					
+
+			}
+			// else
+			// if(reqObject.getJSONObject(0).getString("action").equals("hot_article_10")){
+			// Hot_articleDao hot_article_10 = new Hot_articleDao();
+			// Detail_articleBean ub =
+			// hot_article_10.getUserByName(reqObject.getJSONObject(0).getString("token"));
+			//
+			//
+			// System.out.println(ub.getTitle());
+			// System.out.println(ub.getDate());
+			// System.out.println(ub.getSource());
+			// System.out.println(ub.getKind());
+			// System.out.println(ub.getArticle());
+			// System.out.println(ub.getComment());
+			// System.out.println(ub.getToken());
+			//
+			// if (ub.getToken() != null&& ub.getToken().equals(
+			// reqObject.getJSONObject(0).getString("token"))) {
+			// // respObject = new JSONArray().put(new
+			// JSONObject().put("status",0).put("body", new
+			// JSONObject().put("nickname", "中国")));
+			// respObject = new JSONArray().put(new
+			// JSONObject().put("status",0).put("num",10).
+			// put("body1", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body2", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body3", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body4", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body5", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body6", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body7", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body8", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body9", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())).
+			//
+			// //put(new JSONObject().
+			// put("body10", new JSONObject().put("title",ub.getTitle()).
+			// put("date", ub.getDate()).
+			// put("source", ub.getSource()).
+			// put("kind", ub.getKind()).
+			// put("article", ub.getArticle()).
+			// put("comment", ub.getComment())));
+			//
+			// }
+			// else
+			// respObject = new JSONArray().put(new JSONObject().put("status",
+			// 1));
+			// }
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doctor_like"))
+			{
+				String token = reqObject.getJSONObject(0).getString("token");
+				PrintWriter out = response.getWriter();
+				System.out.println("反馈信息:"
+						+ keyService.getUserCollection_check(token));
+				out.write(keyService.getUserCollection_check(token));
+				out.flush();
+				out.close();
+				// Doc_collection_checkDao doc_collection_check = new
+				// Doc_collection_checkDao();
+				// DocBean ub = doc_collection_check.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// // System.out.println(ub.getHead());
+				// System.out.println(ub.getName());
+				// System.out.println(ub.getHospital());
+				// System.out.println(ub.getDepartment());
+				// System.out.println(ub.getPosition());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getToken());
+				//
+				// Doc_collection_numDao doc_collection_num = new
+				// Doc_collection_numDao();
+				// int rb = doc_collection_num.getUserByName(reqObject
+				// .getJSONObject(0).getString("token"));
+				//
+				// if (ub.getToken() != null
+				// && ub.getToken().equals(
+				// reqObject.getJSONObject(0).getString("token"))) {
+				// // respObject = new JSONArray().put(new
+				// // JSONObject().put("status",0).put("body", new
+				// // JSONObject().put("nickname", "中国")));
+				// respObject = new JSONArray().put(new JSONObject()
+				// .put("status", 0)
+				// .put("num", rb)
+				// .put("body1",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body2",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body3",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body4",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body5",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body6",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body7",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body8",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body9",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())).
+				//
+				// // put(new JSONObject().
+				// put("body10",
+				// new JSONObject()
+				//
+				// .put("name", ub.getName())
+				// .put("hospital", ub.getHospital())
+				// .put("department",
+				// ub.getDepartment())
+				// .put("position", ub.getPosition())
+				// .put("phone", ub.getPhone())));
+				//
+				// } else
+				// respObject = new JSONArray().put(new JSONObject().put(
+				// "status", 1));
+				// respMessage = respObject == null ? "" :
+				// respObject.toString();
+				// System.out.println("反馈信息:" + respMessage);
+				// PrintWriter pw = response.getWriter();
+				// pw.write(respMessage);
+				// pw.flush();
+				// pw.close();
+			}
+
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doctor_add"))
+			{
+				Doc_collectionDao doctor_likeDao = new Doc_collectionDao();
+
+				// String token="9";
+				// UserDao userDao = new UserDao();
+				int rb = doctor_likeDao.getUserByName(
+//						reqObject
+//						.getJSONObject(0).getString("head"), reqObject
+//						.getJSONObject(0).getString("name"), reqObject
+//						.getJSONObject(0).getString("hospital"), reqObject
+//						.getJSONObject(0).getString("department"), reqObject
+//						.getJSONObject(0).getString("position"), 
+						reqObject
+						.getJSONObject(0).getString("phone"), reqObject
+						.getJSONObject(0).getString("token"));
+				// reqObject.getJSONObject(0).getString("nickname"),
+				// reqObject.getJSONObject(0).getString("sex"),
+				// reqObject.getJSONObject(0).getString("area"),
+				// reqObject.getJSONObject(0).getString("address"),
+				// reqObject.getJSONObject(0).getString("school"));
+//				System.out
+//						.println(reqObject.getJSONObject(0).getString("head"));
+//				System.out
+//						.println(reqObject.getJSONObject(0).getString("name"));
+//				System.out.println(reqObject.getJSONObject(0).getString(
+//						"hospital"));
+//				System.out.println(reqObject.getJSONObject(0).getString(
+//						"deparment"));
+//				System.out.println(reqObject.getJSONObject(0).getString(
+//						"position"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("phone"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("register"))
+			{
+				RegistDao registDao = new RegistDao();
+
+				//Register_openfireDao register_openfire = new Register_openfireDao();
+				
+//				int ro = register_openfire.getUserByName(reqObject.getJSONObject(0)
+//						.getString("phone"), reqObject.getJSONObject(0).getString("password"));
+				// UserDao userDao = new UserDao();
+				int rb = registDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("phone"),
+				// reqObject.getJSONObject(0).getString("code"),
+						reqObject.getJSONObject(0).getString("password"),reqObject.getJSONObject(0).getString("code"));
+				// reqObject.getJSONObject(0).getString("nickname"),
+				// reqObject.getJSONObject(0).getString("sex"),
+				// reqObject.getJSONObject(0).getString("area"),
+				// reqObject.getJSONObject(0).getString("address"),
+				// reqObject.getJSONObject(0).getString("school"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("phone"));
+				// System.out.println(reqObject.getJSONObject(0).getString("code"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"password"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"code"));
+				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				// RandomTest S = new RandomTest();
+				String D = reqObject.getJSONObject(0).getString("phone")
+						+ reqObject.getJSONObject(0).getString("password");
+				// int C = RandomTest.getC();
+//				if (rb == 1&&ro==1)
+			
+				
+				//String c =  reqObject.getJSONObject(0).getString("code");
+				//CodeSelectDao codeselect = new CodeSelectDao();
+				//String s=codeselect.getCodeSelect(reqObject.getJSONObject(0).getString("phone"));
+				
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0).put("token", D));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			// else if (reqObject.getJSONObject(0).getString("action")
+			// .equals("article_collection")) {
+			// Article_collectionDao article_collectionDao = new
+			// Article_collectionDao();
+			//
+			// // UserDao userDao = new UserDao();
+			// int rb = article_collectionDao.getUserByName(
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "title")),
+			// // reqObject.getJSONObject(0).getString("code"),
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "date")),
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "source")),
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "kind")),
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "article")),
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "comment")),
+			// Integer.parseInt(reqObject2.getJSONObject(0).getString(
+			// "token")));
+			// // reqObject.getJSONObject(0).getString("nickname"),
+			// // reqObject.getJSONObject(0).getString("sex"),
+			// // reqObject.getJSONObject(0).getString("area"),
+			// // reqObject.getJSONObject(0).getString("address"),
+			// // reqObject.getJSONObject(0).getString("school"));
+			// System.out.println(reqObject.getJSONObject(0)
+			// .getString("title"));
+			// //
+			// System.out.println(reqObject.getJSONObject(0).getString("code"));
+			// System.out
+			// .println(reqObject.getJSONObject(0).getString("date"));
+			// System.out.println(reqObject.getJSONObject(0).getString(
+			// "source"));
+			// System.out
+			// .println(reqObject.getJSONObject(0).getString("kind"));
+			// System.out.println(reqObject.getJSONObject(0).getString(
+			// "article"));
+			// System.out.println(reqObject.getJSONObject(0).getString(
+			// "comment"));
+			// System.out.println(reqObject.getJSONObject(0)
+			// .getString("token"));
+			//
+			// //
+			// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+			// //
+			// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+			// //
+			// System.out.println(reqObject.getJSONObject(0).getString("area"));
+			// //
+			// System.out.println(reqObject.getJSONObject(0).getString("address"));
+			// //
+			// System.out.println(reqObject.getJSONObject(0).getString("school"));
+			// // UserBean ub =
+			// //
+			// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+			// // RandomTest S = new RandomTest();
+			// // String D =
+			// //
+			// reqObject.getJSONObject(0).getString("phone")+reqObject.getJSONObject(0).getString("password");
+			// // int C = RandomTest.getC();
+			// if (rb == 1) {
+			// respObject = new JSONArray().put(new JSONObject().put(
+			// "status", 0));
+			// } else {
+			// respObject = new JSONArray().put(new JSONObject().put(
+			// "status", 1));
+			// }
+			// respMessage = respObject == null ? "" : respObject.toString();
+			// System.out.println("反馈信息:" + respMessage);
+			// PrintWriter pw = response.getWriter();
+			// pw.write(respMessage);
+			// pw.flush();
+			// pw.close();
+			// }
+			
+			 else if (reqObject.getJSONObject(0).getString("action")
+						.equals("card_follow"))
+				{
+					
+				 Floor_numDao fn = new Floor_numDao();
+				    int nf = fn.getUserByName() + 1;
+				    
+				    Card_followDao cf = new Card_followDao();
+				    
+				    int fc = cf.getUserByName(reqObject.getJSONObject(0)
+							.getInt("id"),reqObject.getJSONObject(0)
+							.getString("content"),nf,reqObject.getJSONObject(0)
+							.getInt("towards"));
+				    
+				    System.out.println(reqObject.getJSONObject(0)
+							.getInt("id"));
+				
+					System.out.println(reqObject.getJSONObject(0).getString(
+							"content"));
+					System.out.println(nf);
+					System.out.println(reqObject.getJSONObject(0).getInt(
+							"towards"));
+					
+					
+					if (fc == 1)
+					{
+						respObject = new JSONArray().put(new JSONObject().put(
+								"status", 0));
+					} else
+					{
+						respObject = new JSONArray().put(new JSONObject().put(
+								"status", 1));
+					}
+					respMessage = respObject == null ? "" : respObject.toString();
+					System.out.println("反馈信息:" + respMessage);
+					PrintWriter pw = response.getWriter();
+					pw.write(respMessage);
+					pw.flush();
+					pw.close();
+				}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("get_code"))
+			{
+				//RegistDao registDao = new RegistDao();
+				CodeDao code = new CodeDao();
+				
+				String rb = code.getCode(reqObject.getJSONObject(0)
+						.getString("phone"));
+				// reqObject.getJSONObject(0).getString("nickname"),
+				// reqObject.getJSONObject(0).getString("sex"),
+				// reqObject.getJSONObject(0).getString("area"),
+				// reqObject.getJSONObject(0).getString("address"),
+				// reqObject.getJSONObject(0).getString("school"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("phone"));
+			
+
+				respObject = new JSONArray().put(new JSONObject().put(
+						"code", rb));
+				//int c =  reqObject.getJSONObject(0).getInt("code");
+				
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			
+			
+			
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("judge_commit"))
+			{
+				Comment_doc_commitDao comment_doc_commit = new Comment_doc_commitDao();
+				int ub = comment_doc_commit.getUserByName(
+						reqObject2.getJSONObject(0).getString("phone"),
+						reqObject2.getJSONObject(0).getString("content"),
+						reqObject2.getJSONObject(0).getString("date"), reqObject2
+								.getJSONObject(0).getString("token"));
+
+				// System.out.println(ub.getHead());
+				// System.out.println(ub.getPhone());
+				// System.out.println(ub.getContent());
+				// System.out.println(ub.getTime());
+				// System.out.println(ub.getToken());
+				// System.out.println(ub.getKey());
+
+				// String c=(ub).getId()+"";
+				// String c = Integer.parseInt("key");
+				if (ub == 1)
+				{
+					respObject = new JSONArray()
+							.put(new JSONObject()
+									.put("status", 0)
+									.put("phone",
+											reqObject2.getJSONObject(0)
+													.getString("phone"))
+									.put("content",
+											reqObject2.getJSONObject(0)
+													.getString("content"))
+									.put("date",
+											reqObject2.getJSONObject(0)
+													.getString("date"))
+									.put("token",
+											reqObject2.getJSONObject(0).getInt(
+													"token")));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+
+//				SetjudgeDao setjudgeDao = new SetjudgeDao();
+//
+////				To_head to_head = new To_head();
+////				String head = to_head.to_head( reqObject.getJSONObject(0)
+////						.getString("token"));
+//				// UserDao userDao = new UserDao();
+//				int rb = setjudgeDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("head"), reqObject.getJSONObject(0)
+//						.getString("phone"), reqObject.getJSONObject(0)
+//						.getString("content"), reqObject.getJSONObject(0)
+//						.getString("date"), reqObject.getJSONObject(0)
+//						.getString("token"));
+//				// reqObject.getJSONObject(0).getString("nickname"),
+//				// reqObject.getJSONObject(0).getString("sex"),
+//				// reqObject.getJSONObject(0).getString("area"),
+//				// reqObject.getJSONObject(0).getString("address"),
+//				// reqObject.getJSONObject(0).getString("school"));
+//				System.out
+//						.println(reqObject.getJSONObject(0).getString("head"));
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("phone"));
+//				System.out.println(reqObject.getJSONObject(0).getString(
+//						"content"));
+//				System.out
+//						.println(reqObject.getJSONObject(0).getString("date"));
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+//				// UserBean ub =
+//				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+//				if (rb == 1)
+//				{
+//					respObject = new JSONArray().put(new JSONObject().put(
+//							"status", 0));
+//				} else
+//				{
+//					respObject = new JSONArray().put(new JSONObject().put(
+//							"status", 1));
+//				}
+//				respMessage = respObject == null ? "" : respObject.toString();
+//				System.out.println("反馈信息:" + respMessage);
+//				PrintWriter pw = response.getWriter();
+//				pw.write(respMessage);
+//				pw.flush();
+//				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("get_code"))
+			{
+				Get_codeDao getcodeDao = new Get_codeDao();
+
+				// UserDao userDao = new UserDao();
+				int rb = getcodeDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("phone"), reqObject.getJSONObject(0)
+						.getString("code"), reqObject.getJSONObject(0)
+						.getString("token"));
+				// reqObject.getJSONObject(0).getString("nickname"),
+				// reqObject.getJSONObject(0).getString("sex"),
+				// reqObject.getJSONObject(0).getString("area"),
+				// reqObject.getJSONObject(0).getString("address"),
+				// reqObject.getJSONObject(0).getString("school"));
+
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("phone"));
+				System.out
+						.println(reqObject.getJSONObject(0).getString("code"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("feedback"))
+			{
+				FeedbackDao feedbackDao = new FeedbackDao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone(reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = feedbackDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("content"), reqObject.getJSONObject(0)
+//						.getString("token"));
+				int rb = feedbackDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("content"),to);
+				// reqObject.getJSONObject(0).getString("nickname"),
+				// reqObject.getJSONObject(0).getString("sex"),
+				// reqObject.getJSONObject(0).getString("area"),
+				// reqObject.getJSONObject(0).getString("address"),
+				// reqObject.getJSONObject(0).getString("school"));
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+				System.out.println(to);
+
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"content"));
+				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("improve"))
+			{
+				ImproveDao improveDao = new ImproveDao();
+				Improve_openfire improve_openfire = new Improve_openfire();
+				Back_phoneDao back_phone = new Back_phoneDao();
+				Find_tokenDao find_token = new Find_tokenDao();
+				String bb = back_phone.getUserByName(reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				//
+				UserDao userDao = new UserDao();
+				int rb = improveDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("nickname"), reqObject.getJSONObject(0)
+
+				.getString("sex"),
+						reqObject.getJSONObject(0).getString("area"), reqObject
+								.getJSONObject(0).getString("address"),
+						reqObject.getJSONObject(0).getString("school"),
+						reqObject.getJSONObject(0).getString("head"), reqObject
+								.getJSONObject(0).getString("token"));
+				int ro = improve_openfire.getUserByName(reqObject.getJSONObject(0)
+						.getString("nickname"), reqObject.getJSONObject(0)
+
+				.getString("sex"),
+						reqObject.getJSONObject(0).getString("area"), reqObject
+								.getJSONObject(0).getString("address"),
+						reqObject.getJSONObject(0).getString("school"),
+						reqObject.getJSONObject(0).getString("head"), reqObject
+								.getJSONObject(0).getString("token"));
+				// reqObject.getJSONObject(0).getString("nickname"),
+				// reqObject.getJSONObject(0).getString("sex"),
+				// reqObject.getJSONObject(0).getString("area"),
+				// reqObject.getJSONObject(0).getString("address"),
+				// reqObject.getJSONObject(0).getString("school"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"nickname"));
+				System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				System.out
+						.println(reqObject.getJSONObject(0).getString("area"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"address"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"school"));
+				System.out
+						.println(reqObject.getJSONObject(0).getString("head"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (reqObject.getJSONObject(0).getString("token") != null)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0).put("phone", bb));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+//			else if (reqObject.getJSONObject(0).getString("action")
+//					.equals("modify_head"))
+//			{
+//				HeadDao headDao = new HeadDao();
+//				Get_headDao get_head = new Get_headDao();
+//				String bb = get_head.getUserByName(reqObject.getJSONObject(0)
+//						.getString("token"));
+//				// UserDao userDao = new UserDao();
+//				int rb = headDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("head"), reqObject.getJSONObject(0)
+//						.getString("token"));
+//				// reqObject.getJSONObject(0).getString("nickname"),
+//				// reqObject.getJSONObject(0).getString("sex"),
+//				// reqObject.getJSONObject(0).getString("area"),
+//				// reqObject.getJSONObject(0).getString("address"),
+//				// reqObject.getJSONObject(0).getString("school"));
+//				System.out
+//						.println(reqObject.getJSONObject(0).getString("head"));
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("nickname"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("sex"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("area"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("address"));
+//				// System.out.println(reqObject.getJSONObject(0).getString("school"));
+//				// UserBean ub =
+//				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+//				if (rb == 1)
+//				{
+//					respObject = new JSONArray().put(new JSONObject().put(
+//							"status", 0).put("head", bb));
+//				} else
+//				{
+//					respObject = new JSONArray().put(new JSONObject().put(
+//							"status", 1));
+//				}
+//				respMessage = respObject == null ? "" : respObject.toString();
+//				System.out.println("反馈信息:" + respMessage);
+//				PrintWriter pw = response.getWriter();
+//				pw.write(respMessage);
+//				pw.flush();
+//				pw.close();
+//			}
+
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("modify_password"))
+			{
+				Change_pw_Dao changepwDao = new Change_pw_Dao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone(reqObject.getJSONObject(0)
+						.getString("token"));
+//				Token_to_phone token_to_phone = new Token_to_phone();
+//				String phone = token_to_phone.token_to_phone(reqObject.getJSONObject(0)
+//						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = changepwDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("password"), phone+reqObject.getJSONObject(0)
+//						.getString("password"),phone);
+				int rb = changepwDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("password"),to);
+
+//				System.out.println(phone+reqObject.getJSONObject(0)
+//						.getString("password"));
+				System.out.println(to);
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"password"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} 
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("modify_nickname"))
+			{
+				Change_nick_Dao changenickDao = new Change_nick_Dao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone(reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = changenickDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("nickname"), reqObject.getJSONObject(0)
+//						.getString("token"));
+				int rb = changenickDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("info"),to);
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+				System.out.println(to);
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"info"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("modify_head"))
+			{
+				Change_head_Dao changeheadDao = new Change_head_Dao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone(reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = changenickDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("nickname"), reqObject.getJSONObject(0)
+//						.getString("token"));
+				int rb = changeheadDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("info"), to);
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+				System.out.println(to);
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"info"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("modify_intro"))
+			{
+				Change_intro_Dao changeintroDao = new Change_intro_Dao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone( reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = changenickDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("nickname"), reqObject.getJSONObject(0)
+//						.getString("token"));
+				int rb = changeintroDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("info"), to);
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+				System.out.println(to);
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"info"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("modify_sex"))
+			{
+				Change_sex_Dao changesexDao = new Change_sex_Dao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone( reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = changenickDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("nickname"), reqObject.getJSONObject(0)
+//						.getString("token"));
+				int rb = changesexDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("info"), to);
+//				System.out.println(reqObject.getJSONObject(0)
+//						.getString("token"));
+				System.out.println(to);
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"info"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+			
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("modify_area"))
+			{
+				Change_area_Dao changeareaDao = new Change_area_Dao();
+				Token_to_phone_new top = new Token_to_phone_new();
+				String to = top.Token_to_phone(reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserDao userDao = new UserDao();
+//				int rb = changeareaDao.getUserByName(reqObject.getJSONObject(0)
+//						.getString("area"), reqObject.getJSONObject(0)
+//						.getString("token"));
+				int rb = changeareaDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("info"), to);
+				
+				System.out.println(to);
+				System.out.println(reqObject.getJSONObject(0).getString("info"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("change_add"))
+			{
+				Change_add_Dao changeaddDao = new Change_add_Dao();
+				// String token="9";
+				// UserDao userDao = new UserDao();
+				int rb = changeaddDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("address"), reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"address"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("change_sch"))
+			{
+				Change_sch_Dao changeschDao = new Change_sch_Dao();
+				// String token;
+				// UserDao userDao = new UserDao();
+				int rb = changeschDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("school"), reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"school"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("login_doc"))
+			{
+
+				Doc_lg_Dao registDao = new Doc_lg_Dao();
+				DocBean rb = registDao.getUserByName(reqObject2
+						.getJSONObject(0).getString("phone"));
+
+				if (rb.getPassword() != null
+						&& rb.getPassword().equals(
+								reqObject.getJSONObject(0)
+										.getString("password")))
+				{
+					System.out.println(rb.getPhone());
+					System.out.println(rb.getPassword());
+					System.out.println(rb.getHead());
+					System.out.println(rb.getName());
+					System.out.println(rb.getHospital());
+					System.out.println(rb.getDepartment());
+					System.out.println(rb.getPosition());
+					System.out.println(rb.getSex());
+					System.out.println(rb.getArea());
+					System.out.println(rb.getToken());
+
+					String C = rb.getPhone() + rb.getPassword();
+
+					// respObject = new JSONArray().put(new
+					// JSONObject().put("status",0).put("body", new
+					// JSONObject().put("nickname", "中国")));
+					// System.out.println(1);
+					respObject = new JSONArray()
+							.put(new JSONObject().put("status", 0).put(
+									"body",
+									new JSONObject()
+											.put("head", rb.getHead())
+											.put("name", rb.getName())
+											.put("hospital", rb.getHospital())
+											.put("department",
+													rb.getDepartment())
+											.put("position", rb.getPosition())
+											.put("sex", rb.getSex())
+											.put("area", rb.getArea())
+											.put("token", C)));
+				} else if (rb.getPhone() != ((reqObject.getJSONObject(0)
+						.getString("phone"))))
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+
+				else if (rb.getPassword() != ((reqObject.getJSONObject(0)
+						.getString("password"))))
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 2));
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+
+			}
+			// else
+			// if(reqObject.getJSONObject(0).getString("action").equals("login_doc")){
+			// Doc_lg_Dao docDao = new Doc_lg_Dao();
+			// DocBean rb =
+			// docDao.getUserByName(reqObject2.getJSONObject(0).getString("phone"));
+			// //Doc_lg_Dao userDao = new Doc_lg_Dao();
+			//
+			// System.out.println(rb.getPhone());
+			// System.out.println(rb.getPassword());
+			// System.out.println(rb.getDepartment());
+			// System.out.println(rb.getPosition());
+			// System.out.println(rb.getHospital());
+			// System.out.println(rb.getToken());
+			// System.out.println(rb.getSex());
+			// System.out.println(rb.getArea());
+			//
+			// // DocBean ub =
+			// //
+			// userDao.getUserByName(reqObject.getJSONObject(0).getString("phone"));
+			//
+			// if (rb.getPassword() != null&& rb.getPassword().equals(
+			// reqObject2.getJSONObject(0).getString("password"))) {
+			// // respObject = new JSONArray().put(new
+			// // JSONObject().put("status",0).put("body", new
+			// // JSONObject().put("nickname", "中国")));
+			// respObject = new JSONArray().put(new
+			// JSONObject().put("status",0).
+			// put("body", new JSONObject().put("hospital",rb.getHospital()).
+			// put("position", rb.getPosition()).
+			// put("name", rb.getName()).
+			// put("department", rb.getDepartment()).
+			// put("phone",rb.getPhone()).
+			// put("area",rb.getArea()).
+			// put("sex",rb.getSex()).
+			// put("token",rb.getToken())));
+			//
+			// }
+			// else
+			// respObject = new JSONArray().put(new JSONObject().put("status",
+			// 1));
+			// }
+			else if (reqObject.getJSONObject(0).getString("action")
+					.equals("doc_regist"))
+			{
+				Doc_rg_Dao docrgDao = new Doc_rg_Dao();
+
+				Register_openfireDao register_openfire = new Register_openfireDao();
+				int ro = register_openfire.getUserByName(reqObject.getJSONObject(0)
+						.getString("phone"), reqObject.getJSONObject(0)
+						.getString("password"));
+				// UserDao userDao = new UserDao();
+				int rb = docrgDao.getUserByName(reqObject.getJSONObject(0)
+						.getString("phone"), reqObject.getJSONObject(0)
+						.getString("password"), reqObject.getJSONObject(0)
+						.getString("name"), reqObject.getJSONObject(0)
+						.getString("area"), reqObject.getJSONObject(0)
+						.getString("hospital"), reqObject.getJSONObject(0)
+						.getString("department"), reqObject.getJSONObject(0)
+						.getString("sex"), reqObject.getJSONObject(0)
+						.getString("position"), reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("phone"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"password"));
+				System.out
+						.println(reqObject.getJSONObject(0).getString("name"));
+				System.out
+						.println(reqObject.getJSONObject(0).getString("area"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"hospital"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"department"));
+				System.out.println(reqObject.getJSONObject(0).getString("sex"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"position"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+
+				String D = reqObject.getJSONObject(0).getString("phone")
+						+ reqObject.getJSONObject(0).getString("password");
+
+				if (rb == 1&&ro==1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0).put("token", D));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("change_dc_pw"))
+			{
+				Change_doc_pw_Dao change_dc_pw_Dao = new Change_doc_pw_Dao();
+				Token_to_phone_doc token_to_phone_doc = new Token_to_phone_doc();
+				String phone = token_to_phone_doc.token_to_phone_doc(reqObject
+						.getJSONObject(0).getString("token"));
+				// String token="9";
+				// UserDao userDao = new UserDao();
+				int rb = change_dc_pw_Dao.getUserByName(reqObject
+						.getJSONObject(0).getString("password"), phone+reqObject
+						.getJSONObject(0).getString("password"),phone);
+				System.out.println(phone+reqObject
+						.getJSONObject(0).getString("password"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"password"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("change_doc_ps"))
+			{
+				Change_doc_ps_Dao change_doc_wp_Dao = new Change_doc_ps_Dao();
+				// String token="9";
+				// UserDao userDao = new UserDao();
+				int rb = change_doc_wp_Dao.getUserByName(reqObject
+						.getJSONObject(0).getString("position"), reqObject
+						.getJSONObject(0).getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"position"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("change_doc_dp"))
+			{
+				Change_doc_dp_Dao change_doc_st_Dao = new Change_doc_dp_Dao();
+				// String token="9";
+				// UserDao userDao = new UserDao();
+				int rb = change_doc_st_Dao.getUserByName(reqObject
+						.getJSONObject(0).getString("department"), reqObject
+						.getJSONObject(0).getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out.println(reqObject.getJSONObject(0).getString(
+						"department"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			} else if (reqObject.getJSONObject(0).getString("action")
+					.equals("change_doc_age"))
+			{
+				Change_doc_area_Dao change_doc_age_Dao = new Change_doc_area_Dao();
+				// String token="9";
+				// UserDao userDao = new UserDao();
+				int rb = change_doc_age_Dao.getUserByName(reqObject
+						.getJSONObject(0).getString("area"), reqObject
+						.getJSONObject(0).getString("token"));
+				System.out.println(reqObject.getJSONObject(0)
+						.getString("token"));
+				System.out
+						.println(reqObject.getJSONObject(0).getString("area"));
+
+				// UserBean ub =
+				// userDao.getUserByName(reqObject.getJSONObject(0).getString("username"));
+				if (rb == 1)
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 0));
+				} else
+				{
+					respObject = new JSONArray().put(new JSONObject().put(
+							"status", 1));
+				}
+				respMessage = respObject == null ? "" : respObject.toString();
+				System.out.println("反馈信息:" + respMessage);
+				PrintWriter pw = response.getWriter();
+				pw.write(respMessage);
+				pw.flush();
+				pw.close();
+			}
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+}
+	
+

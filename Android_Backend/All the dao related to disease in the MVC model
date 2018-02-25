@@ -1,0 +1,241 @@
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.DepdisBean;
+import cn.domain.hello.bean.List_articleBean;
+import cn.domain.hello.bean.DisartiBean;
+
+public class DisartiDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<DisartiBean> getUserByName(String src)
+	{
+		// String C=null;
+		DisartiBean disarti = null;
+		List<DisartiBean> keys = new ArrayList<DisartiBean>();
+		try
+		{
+			conn = super.openDB();
+
+			if (conn != null)
+			{
+				String sql = "select * from disarti where s_name = ?";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// disarti = new DisartiBean(rs.getString(1), rs.getInt(2));
+				// }
+				while (rs.next() && rs.getRow() <= 10)
+				{
+					DisartiBean key = new DisartiBean();
+					key.setS_aid(rs.getInt("s_aid"));
+					key.setS_disid(rs.getInt("s_disid"));
+
+					keys.add(key);
+				}
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.Disease_and_guideBean;
+import cn.domain.hello.bean.DocBean;
+import cn.domain.hello.bean.DocCollectionBean;
+import cn.domain.hello.bean.RgtBean;
+
+public class Disease_check extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+
+	public List<Disease_and_guideBean> getUserByName(int src)
+	{
+		//RgtBean docBean = null;
+		List<Disease_and_guideBean> keys = new ArrayList<Disease_and_guideBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String sql = "select * from disease,guide where disease.id = ?";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setInt(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// docBean = new DocBean(rs.getString(1), rs.getString(2),
+				// rs.getString(3), rs.getString(4), rs.getString(5),
+				// rs.getString(6),
+				// rs.getString(7),rs.getString(8),rs.getString(9));
+				// }
+				if (rs.next() )
+				{
+					Disease_and_guideBean key = new Disease_and_guideBean();
+					key.setId(rs.getInt("id"));
+					key.setName(rs.getString("name"));
+					key.setIntro(rs.getString("intro"));
+					key.setPart(rs.getString("part"));
+					key.setCause(rs.getString("cause"));
+					key.setPrevent(rs.getString("prevent"));
+					key.setNurse(rs.getString("nurse"));
+					key.setClick(rs.getInt("click"));
+					key.setTime(rs.getString("time"));
+					key.setFre(rs.getString("fre"));
+					key.setPre(rs.getString("pre"));
+					key.setPro(rs.getString("pro"));
+					key.setSta(rs.getString("sta"));
+					
+					
+					
+					
+//					key.setName(rs.getString("name"));
+//					key.setHospital(rs.getString("hospital"));
+//					key.setDepartment(rs.getString("department"));
+//					key.setPosition(rs.getString("position"));
+//					key.setSex(rs.getString("sex"));
+//					key.setArea(rs.getString("area"));
+					//key.setToken(rs.getString("token"));
+					keys.add(key);
+				}
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.domain.hello.bean.DisartiBean;
+import cn.domain.hello.bean.List_articleBean;
+import cn.domain.hello.bean.DiseaseBean;
+
+public class DiseaseDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	// public PreparedStatement prepStmt2 = null;
+	public ResultSet rs = null;
+
+	// public int rs2;
+
+	public List<DiseaseBean> getUserByName(String src)
+	{
+		// String C=null;
+		DiseaseBean disease = null;
+		List<DiseaseBean> keys = new ArrayList<DiseaseBean>();
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String sql = "select * disease where name = ?";
+				// String sql2 = "update article set click= click+1";
+				// prepStmt2 = conn.prepareStatement(sql2);
+				// prepStmt2.setString(1, src);
+				// rs2 = prepStmt2.executeUpdate();
+
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				rs = prepStmt.executeQuery();
+				// if (rs.next()) {
+				// disease = new DiseaseBean(rs.getInt(1), rs.getString(2),
+				// rs.getString(3), rs.getString(4), rs.getString(5),
+				// rs.getString(6),rs.getString(7), rs.getInt(8));
+				// }
+				while (rs.next() && rs.getRow() <= 10)
+				{
+					DiseaseBean key = new DiseaseBean();
+					key.setId(rs.getInt("id"));
+					key.setName(rs.getString("name"));
+					key.setIntro(rs.getString("intro"));
+					key.setPart(rs.getString("part"));
+					key.setCause(rs.getString("cause"));
+					key.setPrevent(rs.getString("prevent"));
+					key.setNurse(rs.getString("nurse"));
+					key.setClick(rs.getInt("click"));
+
+					keys.add(key);
+				}
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				// if (prepStmt2 != null)
+				// prepStmt2.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keys;
+	}
+}

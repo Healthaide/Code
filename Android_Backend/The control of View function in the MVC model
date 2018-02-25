@@ -1,0 +1,99 @@
+package cn.domain.hello.servlet;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.*;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
+import org.json.JSONArray;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import javax.servlet.ServletException;
+import javax.servlet.http.*;
+
+import cn.domain.hello.dao.ViewListDao;
+import cn.domain.hello.domain.ViewList;
+import cn.domain.hello.tool.Dir;
+
+public class ViewListServlet extends HttpServlet {
+	private static ViewListDao vld = new ViewListDao();
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("application/json;charset=utf-8");
+		HttpSession session = request.getSession();
+		Gson gson = new Gson();
+
+		Enumeration enu = request.getParameterNames();
+		Map<String, Object> ps = new HashMap<String, Object>();
+		while (enu.hasMoreElements()) {
+			String paraName = (String) enu.nextElement();
+			ps = gson.fromJson(request.getParameter(paraName),
+					new TypeToken<Map<String, Object>>() {
+					}.getType());
+		}
+		
+		
+		try{
+			BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8"));
+			StringBuffer sb = new StringBuffer("");
+			String temp;
+			while ((temp = br.readLine()) != null) {
+				sb.append(temp);
+			}
+			br.close();
+			String reqMessage = sb.toString();
+			System.out.println("请求信息:" + reqMessage);
+			JSONArray reqObject1 = new JSONArray(reqMessage);
+			JSONArray reqObject2 = new JSONArray(reqMessage);
+//			ps = gson.fromJson(sb.toString(),new TypeToken<Map<String, String>>() {}.getType());
+		    
+			
+			List<Integer> aordlist = (List<Integer>)reqObject1.getJSONObject(0).get("list");
+			int vp = reqObject2.getJSONObject(0).getInt("page") - 1;
+			int stable = -1;
+			if (reqObject2.getJSONObject(0).getString("action").equals("as_flippage")) {
+				stable = 0;
+			} 
+			if (reqObject2.getJSONObject(0).getString("action").equals("sd_flippage")) {
+				stable = 1;
+			}
+
+			ViewList vl = vld.getSDir(aordlist, vp, stable);
+			PrintWriter writer = response.getWriter();
+			Map<String, Object> map = new HashMap<String, Object>();
+
+			if (vl.getList() == null) {
+				map.put("status", 1);
+				System.out.println("反馈信息:" + "status:" + map.get("status"));
+				writer.print(map);
+			} else {
+				map.put("status", 0);
+				map.put("List", aordlist);
+				String body = "body";
+				Dir dir = new Dir();
+				for (int x = 0; x < 10; x++) {
+					String b = body.concat(String.valueOf(x));
+					dir = (Dir) vl.getList().get(x);
+					map.put(b, dir);
+				}
+				System.out.println("反馈信息:" + new Gson().toJson(map));
+				writer.print(new Gson().toJson(map));
+			}
+			writer.flush();
+			writer.close();
+		}catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
+	}
+
+	public void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doGet(request, response);
+	}
+}

@@ -1,0 +1,264 @@
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.CommentBean;
+
+public class All_doc_numDao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+	public int S;
+
+	public int getUserByName(int src)
+	{
+		// CommentBean commentBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				String sql = "select count(*) from tab_doc where state = ?";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setInt(1, src);
+				rs = prepStmt.executeQuery();
+				if(rs.next())
+					S = rs.getInt(1);
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (rs != null)
+					rs.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return S;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Change_doc_area_Dao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1)
+	{
+		RegistBean registBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				// String D=src+src1;
+				String sql = "update tab_doc set area = ? where token = ? ";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Change_doc_dp_Dao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1)
+	{
+		RegistBean registBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				// String D=src+src1;
+				String sql = "update tab_doc set department = ? where token = ? ";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Change_doc_ps_Dao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1)
+	{
+		RegistBean registBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				// String D=src+src1;
+				String sql = "update tab_doc set position = ? where token = ? ";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}
+package cn.domain.hello.dao;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import cn.domain.hello.bean.RegistBean;
+
+public class Change_doc_pw_Dao extends BaseDao
+{
+	public PreparedStatement prepStmt = null;// preparedStatement实例包含已编译的SQL语句，使语句准备好，保存的？需要在被执行前通过setXXX方法提供
+	public int rs;// setString定义了字符串中第n个？字符的替换
+
+	public int getUserByName(String src, String src1,String src2)
+	{
+		RegistBean registBean = null;
+		try
+		{
+			conn = super.openDB();
+			if (conn != null)
+			{
+				// String D=src+src1;
+				String sql = "update tab_doc set password = ?, token=?where phone = ? ";
+				prepStmt = conn.prepareStatement(sql);
+				prepStmt.setString(1, src);
+				prepStmt.setString(2, src1);
+				prepStmt.setString(2, src2);
+				rs = prepStmt.executeUpdate();
+				// if(rs.next()){
+				// registBean = new
+				// RegistBean(rs.getString(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7));
+				// }
+			}
+		} catch (Exception e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return rs;
+	}
+}

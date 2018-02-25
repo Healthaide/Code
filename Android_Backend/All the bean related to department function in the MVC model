@@ -1,0 +1,117 @@
+package cn.domain.hello.bean;
+
+public class CommentCollectionBean
+{
+	private String phone;
+	private int id;
+	public CommentCollectionBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public CommentCollectionBean(String phone, int id)
+	{
+		super();
+		this.phone = phone;
+		this.id = id;
+	}
+	public String getPhone()
+	{
+		return phone;
+	}
+	public void setPhone(String phone)
+	{
+		this.phone = phone;
+	}
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	
+}
+package cn.domain.hello.bean;
+
+public class DepartmentBean
+{
+	private int depid;
+	private String name;
+
+	public DepartmentBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public DepartmentBean(int depid, String name)
+	{
+		super();
+		this.depid = depid;
+		this.name = name;
+	}
+
+	public int getDepid()
+	{
+		return depid;
+	}
+
+	public void setDepid(int depid)
+	{
+		this.depid = depid;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+}
+package cn.domain.hello.bean;
+
+public class DepartmentBean
+{
+	private int depid;
+	private String name;
+
+	public DepartmentBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public DepartmentBean(int depid, String name)
+	{
+		super();
+		this.depid = depid;
+		this.name = name;
+	}
+
+	public int getDepid()
+	{
+		return depid;
+	}
+
+	public void setDepid(int depid)
+	{
+		this.depid = depid;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+}

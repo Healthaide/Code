@@ -1,0 +1,262 @@
+package cn.domain.hello.bean;
+
+public class Disease_and_guideBean
+{
+	private int id;
+	private String name;
+	private String intro;
+	private String part;
+	private String cause;
+	private String prevent;
+	private String nurse;
+	private int click;
+	private String time;
+	private String fre;
+	private String pre;
+	private String pro;
+	private String sta;
+	public Disease_and_guideBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	public Disease_and_guideBean(int id, String name, String intro,
+			String part, String cause, String prevent, String nurse, int click,
+			String time, String fre, String pre, String pro, String sta)
+	{
+		super();
+		this.id = id;
+		this.name = name;
+		this.intro = intro;
+		this.part = part;
+		this.cause = cause;
+		this.prevent = prevent;
+		this.nurse = nurse;
+		this.click = click;
+		this.time = time;
+		this.fre = fre;
+		this.pre = pre;
+		this.pro = pro;
+		this.sta = sta;
+	}
+	public int getId()
+	{
+		return id;
+	}
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+	public String getName()
+	{
+		return name;
+	}
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	public String getIntro()
+	{
+		return intro;
+	}
+	public void setIntro(String intro)
+	{
+		this.intro = intro;
+	}
+	public String getPart()
+	{
+		return part;
+	}
+	public void setPart(String part)
+	{
+		this.part = part;
+	}
+	public String getCause()
+	{
+		return cause;
+	}
+	public void setCause(String cause)
+	{
+		this.cause = cause;
+	}
+	public String getPrevent()
+	{
+		return prevent;
+	}
+	public void setPrevent(String prevent)
+	{
+		this.prevent = prevent;
+	}
+	public String getNurse()
+	{
+		return nurse;
+	}
+	public void setNurse(String nurse)
+	{
+		this.nurse = nurse;
+	}
+	public int getClick()
+	{
+		return click;
+	}
+	public void setClick(int click)
+	{
+		this.click = click;
+	}
+	public String getTime()
+	{
+		return time;
+	}
+	public void setTime(String time)
+	{
+		this.time = time;
+	}
+	public String getFre()
+	{
+		return fre;
+	}
+	public void setFre(String fre)
+	{
+		this.fre = fre;
+	}
+	public String getPre()
+	{
+		return pre;
+	}
+	public void setPre(String pre)
+	{
+		this.pre = pre;
+	}
+	public String getPro()
+	{
+		return pro;
+	}
+	public void setPro(String pro)
+	{
+		this.pro = pro;
+	}
+	public String getSta()
+	{
+		return sta;
+	}
+	public void setSta(String sta)
+	{
+		this.sta = sta;
+	}
+	
+	
+}
+package cn.domain.hello.bean;
+
+public class DiseaseBean
+{
+	private int id;
+	private String name;
+	private String intro;
+	private String part;
+	private String cause;
+	private String prevent;
+	private String nurse;
+	private int click;
+
+	public DiseaseBean()
+	{
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public DiseaseBean(int id, String name, String intro, String part,
+			String cause, String prevent, String nurse, int click)
+	{
+		super();
+		this.id = id;
+		this.name = name;
+		this.intro = intro;
+		this.part = part;
+		this.cause = cause;
+		this.prevent = prevent;
+		this.nurse = nurse;
+		this.click = click;
+	}
+
+	public int getId()
+	{
+		return id;
+	}
+
+	public void setId(int id)
+	{
+		this.id = id;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getIntro()
+	{
+		return intro;
+	}
+
+	public void setIntro(String intro)
+	{
+		this.intro = intro;
+	}
+
+	public String getPart()
+	{
+		return part;
+	}
+
+	public void setPart(String part)
+	{
+		this.part = part;
+	}
+
+	public String getCause()
+	{
+		return cause;
+	}
+
+	public void setCause(String cause)
+	{
+		this.cause = cause;
+	}
+
+	public String getPrevent()
+	{
+		return prevent;
+	}
+
+	public void setPrevent(String prevent)
+	{
+		this.prevent = prevent;
+	}
+
+	public String getNurse()
+	{
+		return nurse;
+	}
+
+	public void setNurse(String nurse)
+	{
+		this.nurse = nurse;
+	}
+
+	public int getClick()
+	{
+		return click;
+	}
+
+	public void setClick(int click)
+	{
+		this.click = click;
+	}
+
+}

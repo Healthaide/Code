@@ -1,0 +1,61 @@
+package cn.itcast.cstm.dao;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+
+import cn.itcast.cstm.domain.Customer;
+import cn.itcast.jdbc.TxQueryRunner;
+
+public class CustomerDao {
+	
+	private QueryRunner qr=new TxQueryRunner();
+  	public void addd(Customer c){
+		try{
+			String sql="insert into doctor2 values(?,?,?,?,?,?,?)";
+			Object[] params={c.getDid(),c.getName(),c.getHospital(),c.getDepartment(),c.getPosition(),c.getPhone(),c.getPassword()};
+			qr.update(sql,params);
+			
+		}catch(SQLException e){
+			throw new RuntimeException(e);
+		}
+		}
+}
+
+package cn.itcast.cstm.web.servlet;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import cn.itcast.cstm.domain.Customer;
+import cn.itcast.cstm.domain.PageBean;
+import cn.itcast.cstm.service.CustomerService;
+import cn.itcast.servlet.BaseServlet;
+import cn.itcast.usermng.domain.User;
+import cn.itcast.usermng.service.UserException;
+import cn.itcast.usermng.service.UserService;
+import cn.itcast.utils.CommonUtils;
+
+public class CustomerServlet extends BaseServlet {
+
+	private CustomerService customerService=new CustomerService();
+  
+  	public String addd(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		Customer c= CommonUtils.toBean(request.getParameterMap(), Customer.class);
+		c.setDid(CommonUtils.uuid());
+		customerService.addd(c);
+		request.setAttribute("msg","授权成功");
+		return "f:/doctor1.jsp";
+		
+	}
+  
