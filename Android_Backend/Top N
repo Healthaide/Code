@@ -1,0 +1,46 @@
+package cn.domain.hello.tool;
+
+import java.util.*;
+import java.util.Map.Entry; 
+
+import cn.domain.hello.tool.IndexT;
+
+public class TopN {
+
+	public static List<Integer> topN(int N, HashMap<Integer,IndexT> hash) {
+		TreeSet<IndexT> topN = new TreeSet<IndexT>();
+		List<Integer> list = new ArrayList<Integer>();
+		int minRel = 0;
+		
+		System.out.println("the size of hashmap:"+hash.size());
+		
+		Set<Entry<Integer,IndexT>> sets = hash.entrySet();  
+        for(Entry<Integer,IndexT> entry : sets) {  
+        	IndexT indext = entry.getValue();
+			if (0 == minRel) {// 锟斤拷一锟斤拷锟斤拷锟斤拷
+				minRel = indext.getrel();
+			}
+			if (topN.size() < N) {// 锟斤拷锟斤拷锟斤拷锟斤拷topN
+				topN.add(indext);
+				if (indext.getrel() < minRel) {
+					minRel = indext.getrel();// 锟斤拷锟斤拷锟斤拷头锟�?
+				}
+				System.out.println(indext);
+			} else if (indext.getrel() > minRel) {
+				topN.remove(topN.last());// 锟斤拷删锟斤拷topN锟叫碉拷锟斤拷头锟�?
+				topN.add(indext);
+				minRel = topN.last().getrel();// 锟斤拷锟斤拷锟斤拷头锟�?
+			} else if (indext.getrel() == minRel) {
+				if (indext.getclick() > topN.last().getclick()) {
+					topN.remove(topN.last());
+					topN.add(indext);
+				}
+			}
+        }  
+	
+		for (IndexT indext : topN) {
+			list.add(indext.getAID());
+		}
+		return list;
+	}
+}
