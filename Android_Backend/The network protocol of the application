@@ -1,0 +1,963 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.xushihuai.frames;
+
+import com.sun.xml.internal.ws.wsdl.writer.document.Message;
+import com.xushihuai.domain.Users;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+
+/**
+ *
+ * @author xushihuai
+ */
+public class Server extends JFrame
+{
+    private JTextArea jta1;  
+    private JTextField jtfMax,jtfPort,jtfIp,jtfNum,jtfSta,jtfName;
+    private JLabel jlIp,jlNum,jlSta,jlName,jlPort,jlMax;
+    private JButton jbStart,jbStop,jbExit;  
+    private JPanel upPanel,downPanel;  
+    private JScrollPane leftPanel,rightPanel;  
+    private JSplitPane jsp1;  
+    private JList usersList;  
+    private DefaultListModel listModel;  
+    private URL imgURL;
+    private int max,port;  
+    private ServerSocket serverSocket;
+    private ServerThread serverThread;  
+    private ArrayList<ClientThread> clients;  
+    private boolean isStart = false;  
+    public Server()throws IOException 
+    {
+        this.setResizable(false);
+        this.setSize(813, 435);
+        this.setTitle("Server");
+        imgURL = this.getClass().getResource("/com/xushihuai/images/logo.jpg");
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(imgURL));
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        //up
+        upPanel=new JPanel();
+        upPanel.setLayout(null);
+        upPanel.setBackground(new Color(255, 255, 255));
+        upPanel.setBorder(new TitledBorder("Server's information"));   
+        upPanel.setBounds(0,0,807,46);
+        
+        jlSta=new JLabel();
+        jlSta.setBounds(new Rectangle(5, 15, 120, 22));
+        jlSta.setText("Current Status");
+        jlSta.setFont(new Font("宋体",0,14));
+        jtfSta = new JTextField();
+        jtfSta.setBounds(new Rectangle(110, 15, 100, 22));
+        jtfSta.setFont(new Font("宋体",0,14));
+        jtfSta.setEditable(false);
+        jtfSta.setText("Closed");
+        jlNum=new JLabel();
+        jlNum.setBounds(new Rectangle(215, 15, 120, 22));
+        jlNum.setText("Online Number");
+        jlNum.setFont(new Font("宋体",0,14));
+        jtfNum = new JTextField();
+        jtfNum.setBounds(new Rectangle(313,15,100,22));
+        jtfNum.setFont(new Font("宋体",0,14));
+        jtfNum.setEditable(false);
+        jtfNum.setText("0");
+        jlName=new JLabel();
+        jlName.setBounds(new Rectangle(418, 15, 100, 22));
+        jlName.setText("Server's Name");
+        jlName.setFont(new Font("宋体",0,14));
+        jtfName = new JTextField();
+        jtfName.setBounds(new Rectangle(516, 15, 100, 22));
+        jtfName.setEditable(false);
+        jlIp=new JLabel();
+        jlIp.setBounds(new Rectangle(621, 15, 100, 22));
+        jlIp.setText("Server's IP");
+        jlIp.setFont(new Font("宋体",0,14));
+        jtfIp = new JTextField();
+        jtfIp.setBounds(new Rectangle(703, 15, 100, 22));
+        jtfIp.setEditable(false);
+        upPanel.add(jtfIp,null);
+        upPanel.add(jtfName,null);
+        upPanel.add(jtfNum,null);
+        upPanel.add(jtfSta,null);
+        upPanel.add(jlIp,null);
+        upPanel.add(jlName,null);
+        upPanel.add(jlNum,null);
+        upPanel.add(jlSta,null);
+        //mid
+        jta1 = new JTextArea();  
+        jta1.setEditable(false);  
+        jta1.setForeground(Color.black);  
+        listModel = new DefaultListModel();  
+        usersList = new JList(listModel);  
+        leftPanel = new JScrollPane(usersList);  
+        leftPanel.setBorder(new TitledBorder("Online Users"));  
+        rightPanel = new JScrollPane(jta1);  
+        rightPanel.setBorder(new TitledBorder("Chatting contents"));  
+        jsp1=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,leftPanel,rightPanel);  
+        jsp1.setDividerLocation(150);  
+        jsp1.setBounds(20, 50,769, 300);
+        //down
+        downPanel = new JPanel();  
+        downPanel.setLayout(null);  
+        downPanel.setBorder(new TitledBorder("Configuration information"));   
+        downPanel.setBackground(new Color(255, 255, 255));
+        downPanel.setBounds(0,350,807,50);
+        
+        jlMax=new JLabel();
+        jlMax.setBounds(new Rectangle(5, 15, 120, 22));
+        jlMax.setText("Maxuser");
+        jlMax.setFont(new Font("宋体",0,14));
+        jtfMax=new JTextField();
+        jtfMax.setBounds(new Rectangle(60, 15, 120, 22));
+        jtfMax.setText("25");
+        jtfMax.setFont(new Font("宋体",0,14));
+        jlPort=new JLabel();
+        jlPort.setText("Port");
+        jlPort.setBounds(new Rectangle(200, 15, 120, 22));
+        jlPort.setFont(new Font("宋体",0,14));
+        jtfPort = new JTextField();
+        jtfPort.setBounds(new Rectangle(235, 15, 120, 22));
+        jtfPort.setText("7777");
+        jtfPort.setFont(new Font("宋体",0,14));
+        jbStart = new JButton();
+        jbStart.setBounds(new Rectangle(380, 15, 78, 22)); 
+        jbStart.setText("Start");
+        jbStop = new JButton();
+        jbStop.setBounds(new Rectangle(480, 15, 78, 22)); 
+        jbStop.setText("Stop");
+        jbStop.setEnabled(false);
+        jbExit = new JButton();
+        jbExit.setBounds(new Rectangle(580, 15, 78, 22)); 
+        jbExit.setText("Exit");
+        downPanel.add(jlMax,null);  
+        downPanel.add(jtfMax,null);  
+        downPanel.add(jlPort,null);  
+        downPanel.add(jtfPort,null);  
+        downPanel.add(jbStart,null);  
+        downPanel.add(jbStop,null);  
+        downPanel.add(jbExit,null);  
+        
+        this.setLayout(null);  
+        this.add(upPanel);  
+        this.add(jsp1);  
+        this.add(downPanel);  
+        //this.setSize(Toolkit.getDefaultToolkit().getScreenSize());//full scrren  
+        int screen_width = Toolkit.getDefaultToolkit().getScreenSize().width;  
+        int screen_height = Toolkit.getDefaultToolkit().getScreenSize().height;  
+        this.setLocation((screen_width - this.getWidth()) / 2,(screen_height - this.getHeight()) / 2);  
+        this.setVisible(true);  
+        myEvent();
+        try
+        {
+            //Get the server's host name and IP address
+            InetAddress address = InetAddress.getLocalHost();      
+            jtfName.setText(address.getHostName());
+            jtfIp.setText(address.getHostAddress());
+        }
+        catch(IOException e)
+        {
+            throw new IOException();
+        }
+    }
+    public void myEvent()
+    {
+        jbStart.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                try 
+                {  
+                    try 
+                    {  
+                        max = Integer.parseInt(jtfMax.getText().trim());  
+                    } 
+                    catch (Exception e1) 
+                    {  
+                        throw new Exception("The max number must be a postive integer!");  
+                    }  
+                    if (max <= 0) 
+                    {  
+                        throw new Exception("The max number must be a postive integer!");  
+                    }  
+                    try 
+                    {  
+                        port = Integer.parseInt(jtfPort.getText().trim());  
+                    } 
+                    catch (Exception e1) 
+                    {  
+                        throw new Exception("The port number must be a postive integer!");  
+                    }  
+                    if (port<= 0) 
+                    {  
+                        throw new Exception("The port number must be a postive integer!");  
+                    }  
+                    serverStart(max, port);  
+                    jta1.append("The server has started successfully! The maximum number of users are " + max + " and the port number is " + port  + "\r\n");  
+                    JOptionPane.showMessageDialog(null,"The server has started successfully!");  
+                    jbStart.setEnabled(false);  
+                    jtfMax.setEnabled(false);  
+                    jtfPort.setEnabled(false);  
+                    jbStop.setEnabled(true);  
+                    jtfSta.setText("Started");
+                }
+                catch (Exception exc) 
+                {  
+                    JOptionPane.showMessageDialog(null, exc.getMessage(),"Wrong", JOptionPane.ERROR_MESSAGE);  
+                }  
+            }
+        });
+        jbStop.addActionListener(new ActionListener() 
+        {  
+            public void actionPerformed(ActionEvent e) 
+            {  
+                try 
+                {  
+                    System.out.println("h");
+                    closeServer();  
+                    jbStart.setEnabled(true);  
+                    jtfMax.setEnabled(true);  
+                    jtfPort.setEnabled(true);  
+                    jbStop.setEnabled(false);  
+                    jtfSta.setText("Closed");
+                    jta1.append("The server has been successfully stopped!\r\n");  
+                    JOptionPane.showMessageDialog(null,"The server has been successfully stopped！");  
+                    
+                } 
+                catch (Exception exc) 
+                {  
+                    JOptionPane.showMessageDialog(null,"停止服务器发生异常!","错误",JOptionPane.ERROR_MESSAGE);  
+                }  
+            }  
+        }); 
+        jbExit.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                System.exit(0);
+            }
+        });
+    }
+    public static void main(String[] args) throws IOException
+    {  
+        new Server();  
+    }  
+    class ServerThread extends Thread 
+    {  
+        private ServerSocket serverSocket;  
+        private int max;// 人数上限  
+  
+        // Constructor of server thread  
+        public ServerThread(ServerSocket serverSocket, int max) 
+        {  
+            this.serverSocket = serverSocket;  
+            this.max = max;  
+        }  
+  
+        public void run() 
+        {  
+            while (true) //Wait for the connection of users
+            {
+                try 
+                {  
+                    Socket socket = serverSocket.accept();  
+                    if (clients.size() == max) // if it achieves the limit of max number  
+                    {
+                        BufferedReader r = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
+                        PrintWriter w = new PrintWriter(socket.getOutputStream());  
+                        // 接收客户端的基本用户信息  Receice the baisc information of clients
+                        String inf = r.readLine();  
+                        StringTokenizer st = new StringTokenizer(inf, "@");  
+                        Users user = new Users(st.nextToken(), st.nextToken());  
+                        // 反馈连接成功信息  
+                        w.println("MAX@服务器：对不起，"+user.getName()+ user.getIp() + "，服务器在线人数已达上限，请稍后尝试连接！");  
+                        w.flush();  
+                        // 释放资源  
+                        r.close();  
+                        w.close();  
+                        socket.close();  
+                        continue;  
+                    }  
+                    ClientThread client = new ClientThread(socket);  
+                    client.start();// 开启对此客户端服务的线程  
+                    clients.add(client);  
+                    listModel.addElement(client.getUser().getName());// 更新在线列表  
+                    //contentArea.append(client.getUser().getName()  + client.getUser().getIp() + "上线!\r\n");  
+                } catch (IOException e)
+                {  
+                    e.printStackTrace();  
+                }  
+            }  
+        }  
+    }  
+        
+    public void serverStart(int max, int port)throws IOException
+    {  
+        try 
+        {  
+            clients = new ArrayList<ClientThread>();  
+            serverSocket = new ServerSocket(port);  
+            serverThread = new ServerThread(serverSocket,max);  
+            serverThread.start();  
+            isStart = true;  
+        } 
+        catch (BindException e) 
+        {  
+            isStart = false;  
+            throw new BindException("The port number is occupied, please change another one!");  
+        } 
+        catch (Exception e1) 
+        {  
+            e1.printStackTrace();  
+            isStart = false;  
+            throw new BindException("Exception of starting server!");  
+        }  
+    }    
+    @SuppressWarnings("deprecation")  
+    public void closeServer()
+    {  
+        try 
+        {  
+            if (serverThread!= null)  
+            {
+                serverThread.stop();// 停止服务器线程  
+                
+            }
+            for (int i = clients.size() - 1; i >= 0; i--) 
+            {  
+                
+                // 给所有在线用户发送关闭命令  
+                clients.get(i).getWriter().println("CLOSE");  
+                clients.get(i).getWriter().flush();  
+                // 释放资源  
+                clients.get(i).stop();// 停止此条为客户端服务的线程  
+                clients.get(i).reader.close();  
+                clients.get(i).writer.close();  
+                clients.get(i).socket.close();  
+                clients.remove(i);  
+            }  
+            if (serverSocket != null)
+            {  
+                serverSocket.close();// 关闭服务器端连接  
+            }  
+            listModel.removeAllElements();// 清空用户列表  
+            isStart = false;  
+        } 
+        catch (IOException e) 
+        {  
+            e.printStackTrace();  
+            isStart = true;  
+        }  
+    }  
+    class ClientThread extends Thread 
+    {  
+        private Socket socket;  
+        private BufferedReader reader;  
+        private PrintWriter writer;  
+        private Users user;  
+  
+        public BufferedReader getReader() 
+        {  
+            return reader;  
+        }  
+  
+        public PrintWriter getWriter() 
+        {  
+            return writer;  
+        }  
+  
+        public Users getUser() 
+        {  
+            return user;  
+        }  
+  
+        // 客户端线程的构造方法  
+        public ClientThread(Socket socket) 
+        {  
+            try 
+            {  
+                this.socket = socket;  
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
+                writer = new PrintWriter(socket.getOutputStream());  
+                // 接收客户端的基本用户信息  
+                String inf = reader.readLine();  
+                StringTokenizer st = new StringTokenizer(inf, "@");  
+                user = new Users(st.nextToken(), st.nextToken());  
+                // 反馈连接成功信息  
+                writer.println(user.getName() + user.getIp() + "与服务器连接成功!");  
+                writer.flush();  
+                // 反馈当前在线用户信息  
+                if (clients.size() > 0)
+                {  
+                    String temp = "";  
+                    for (int i = clients.size() - 1; i >= 0; i--) 
+                    {  
+                        temp += (clients.get(i).getUser().getName() + "/" + clients.get(i).getUser().getIp())+ "@";  
+                    }  
+                    writer.println("USERLIST@" + clients.size() + "@" + temp);  
+                    writer.flush();  
+                }  
+                // 向所有在线用户发送该用户上线命令  
+                for (int i = clients.size() - 1; i >= 0; i--) 
+                {  
+                    clients.get(i).getWriter().println("ADD@" + user.getName() + user.getIp());  
+                    clients.get(i).getWriter().flush();  
+                }  
+            } 
+            catch (IOException e) 
+            {  
+                e.printStackTrace();  
+            }  
+        }  
+  
+        //@SuppressWarnings("deprecation")  
+        public void run()// 不断接收客户端的消息，进行处理。 
+        { 
+            String message = null;  
+            while (true) 
+            {  
+                try 
+                {  
+                    message = reader.readLine();// 接收客户端消息  
+                    if (message.equals("CLOSE"))// 下线命令  
+                    {  
+                        //contentArea.append(this.getUser().getName() + this.getUser().getIp() + "下线!\r\n");  
+                        // 断开连接释放资源  
+                        reader.close();  
+                        writer.close();  
+                        socket.close();  
+  
+                        // 向所有在线用户发送该用户的下线命令  
+                        for (int i = clients.size() - 1; i >= 0; i--) 
+                        {  
+                            clients.get(i).getWriter().println("DELETE@" + user.getName());  
+                            clients.get(i).getWriter().flush();  
+                        }  
+  
+                        listModel.removeElement(user.getName());// 更新在线列表  
+  
+                        // 删除此条客户端服务线程  
+                        for (int i = clients.size() - 1; i >= 0; i--) 
+                        {  
+                            if (clients.get(i).getUser() == user) 
+                            {  
+                                ClientThread temp = clients.get(i);  
+                                clients.remove(i);// 删除此用户的服务线程  
+                                temp.stop();// 停止这条服务线程  
+                                return;  
+                            }  
+                        }  
+                    } 
+                    else 
+                    {  
+                        dispatcherMessage(message);// 转发消息  
+                    }  
+                }
+                catch (IOException e) 
+                {  
+                    e.printStackTrace();  
+                }  
+            }  
+        }  
+  
+        // 转发消息  
+        public void dispatcherMessage(String message) 
+        {  
+            StringTokenizer stringTokenizer = new StringTokenizer(message, "@");  
+            String source = stringTokenizer.nextToken();  
+            String owner = stringTokenizer.nextToken();  
+            String content = stringTokenizer.nextToken();  
+            message = source + "说：" + content;  
+            //contentArea.append(message + "\r\n");  
+            if (owner.equals("ALL")) {// 群发  
+                for (int i = clients.size() - 1; i >= 0; i--) 
+                {  
+                    clients.get(i).getWriter().println(message + "(多人发送)");  
+                    clients.get(i).getWriter().flush();  
+                }  
+            }  
+        }  
+    }  
+}
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.xushihuai.frames;
+
+/**
+ *
+ * @author xushihuai
+ */
+
+import com.xushihuai.domain.Users;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InvalidClassException;
+import java.io.NotSerializableException;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
+import javax.swing.JTextField;
+import javax.swing.JOptionPane;
+import javax.swing.ImageIcon;
+import static javax.swing.JFrame.EXIT_ON_CLOSE;
+public class LoginClient extends JFrame 
+{
+
+    private JPanel jContentPane;
+    private JButton jbLogin,jbExit;
+    private JTextField jtfIp,jtfPort,jtfName;
+    private JLabel jl1,jl2,jl3,jLabel1,jLabel2;
+    private URL imgURL;
+    private String serverIp,userName;
+    private int portNum;
+    private Socket socket;
+    private boolean isConnected = false;  
+    private PrintWriter writer;  
+    private BufferedReader reader;  
+    private MessageThread messageThread;// 负责接收消息的线程  
+    private Map<String, Users> onLineUsers = new HashMap<String, Users>();// 所有在线用户  
+    public void initialize() 
+    {
+        this.setResizable(false);
+        this.setSize(281, 395);
+        this.setTitle("For Clients");
+        imgURL = this.getClass().getResource("/com/xushihuai/images/logo.jpg");
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(imgURL));
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        jbLogin = new JButton();
+        jbLogin.setBounds(new Rectangle(21, 332, 78, 26)); 
+        jbLogin.setText("Login");
+        jbExit = new JButton();
+        jbExit.setBounds(new Rectangle(186, 332, 78, 26));
+        jbExit.setText("Exit");
+        jtfIp = new JTextField(20);
+        jtfIp.setBounds(new Rectangle(122, 242, 124, 22));
+        jtfIp.setText("127.0.0.1");
+        jtfPort = new JTextField(20);
+        jtfPort.setBounds(new Rectangle(122, 272, 124, 22));
+        jtfPort.setText("7777");
+        jtfName = new JTextField(20);
+        jtfName.setBounds(new Rectangle(122, 302, 124, 22));
+        jLabel1 = new JLabel();
+        jLabel1.setBounds(new Rectangle(0, 0, 278, 198));
+        imgURL = this.getClass().getResource("/com/xushihuai/images/time.jpg");
+        jLabel1.setIcon(new ImageIcon(imgURL));
+        jl1 = new JLabel();
+        jl1.setBounds(new Rectangle(29, 245, 75, 19));
+        jl1.setText("Server's IP");
+        jl1.setForeground(Color.white);
+        jl2 = new JLabel();
+        jl2.setBounds(new Rectangle(29, 275, 75, 19));
+        jl2.setText("Port Number");
+        jl2.setForeground(Color.white);
+        jl3 = new JLabel();
+        jl3.setBounds(new Rectangle(29, 305, 75, 19));
+        jl3.setText("Username");
+        jl3.setForeground(Color.white);
+        jLabel2 = new JLabel();
+        jLabel2.setBounds(new Rectangle(0, 198, 280, 130));
+        imgURL = this.getClass().getResource("/com/xushihuai/images/user.jpg");
+        jLabel2.setIcon(new ImageIcon(imgURL));
+        jContentPane = new JPanel();
+        jContentPane.setLayout(null);
+        jContentPane.setBackground(new Color(255, 255, 255));
+        jContentPane.add(jl1, null);
+        jContentPane.add(jl2, null);
+        jContentPane.add(jl3, null);
+        jContentPane.add(jLabel1, null);
+        jContentPane.add(jLabel2, null);
+        jContentPane.add(jbLogin, null);
+        jContentPane.add(jbExit, null);
+        jContentPane.add(jtfIp, null);
+        jContentPane.add(jtfPort, null);
+        jContentPane.add(jtfName, null);
+        setContentPane(jContentPane);
+        this.setVisible(true);
+    }
+
+    public void myEvent()
+    {
+
+        jbExit.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                    System.exit(0);
+            }
+        });
+        jbLogin.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                try
+                {
+                    try
+                    {
+                        portNum = Integer.parseInt(jtfPort.getText().trim());  
+                    }
+                    catch (NumberFormatException e2) 
+                    {  
+                        throw new Exception("端口号不符合要求!端口为整数!");  
+                    }  
+                    serverIp=jtfIp.getText().trim();  
+                    userName=jtfName.getText().trim();  
+                    if (userName.equals("") || serverIp.equals("")) 
+                    {  
+                        throw new Exception("姓名、服务器IP不能为空!");  
+                    }  
+                    boolean flag=connectServer(portNum,serverIp,userName);  
+                    if (flag==false) 
+                    {  
+                        throw new Exception("与服务器连接失败!");  
+                    }
+                    setTitle(userName);
+                    JOptionPane.showMessageDialog(null, "成功连接!");  
+                    dispose();
+                    new Client(serverIp, userName);
+                }
+                catch (Exception exc) 
+                {  
+                    JOptionPane.showMessageDialog(null, exc.getMessage(),"错误", JOptionPane.ERROR_MESSAGE);  
+                }  
+                }
+            });
+        
+        }
+    public boolean connectServer(int port, String hostIp, String name) 
+    {  
+        try {  
+            socket = new Socket(hostIp, port);// 根据端口号和服务器ip建立连接  
+            writer = new PrintWriter(socket.getOutputStream());  
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
+            // 发送客户端用户基本信息(用户名和ip地址)  
+            sendMessage(name + "@" + socket.getLocalAddress().toString());  
+            // 开启接收消息的线程  
+            //messageThread = new MessageThread(reader, textArea);  
+            messageThread.start();  
+            isConnected = true;// 已经连接上了  
+            return true;  
+        } catch (Exception e) {  
+            //textArea.append("与端口号为：" + port + "    IP地址为：" + hostIp  + "   的服务器连接失败!" + "\r\n");  
+            //isConnected = false;// 未连接上  
+            //System.out.println(e.getMessage());
+            return false;  
+        }  
+    }  
+        public void sendMessage(String message) {  
+        writer.println(message);  
+        writer.flush();  
+    }  
+    public LoginClient() 
+    {
+        initialize();
+    }
+        class MessageThread extends Thread {  
+        private BufferedReader reader;  
+        private JTextArea textArea;  
+  
+        // 接收消息线程的构造方法  
+        public MessageThread(BufferedReader reader, JTextArea textArea) {  
+            this.reader = reader;  
+            this.textArea = textArea;  
+        }  
+  
+        // 被动的关闭连接  
+        /*
+        public synchronized void closeCon() throws Exception {  
+            // 清空用户列表  
+            listModel.removeAllElements();  
+            // 被动的关闭连接释放资源  
+            if (reader != null) {  
+                reader.close();  
+            }  
+            if (writer != null) {  
+                writer.close();  
+            }  
+            if (socket != null) {  
+                socket.close();  
+            }  
+            isConnected = false;// 修改状态为断开  
+        }  
+  */
+        public void run() {  
+            String message = "";  
+            while (true) {  
+                try {  
+                    message = reader.readLine();  
+                    StringTokenizer stringTokenizer = new StringTokenizer(  
+                            message, "/@");  
+                    String command = stringTokenizer.nextToken();// 命令  
+                    if (command.equals("CLOSE"))// 服务器已关闭命令  
+                    {  
+                        textArea.append("服务器已关闭!\r\n");  
+                        //closeCon();// 被动的关闭连接  
+                        return;// 结束线程  
+                    } else if (command.equals("ADD")) {// 有用户上线更新在线列表  
+                        String username = "";  
+                        String userIp = "";  
+                        if ((username = stringTokenizer.nextToken()) != null  
+                                && (userIp = stringTokenizer.nextToken()) != null) {  
+                            Users user = new Users(username, userIp);  
+                            onLineUsers.put(username, user);  
+                            //listModel.addElement(username);  
+                        }  
+                    } else if (command.equals("DELETE")) {// 有用户下线更新在线列表  
+                        String username = stringTokenizer.nextToken();  
+                        Users user = (Users) onLineUsers.get(username);  
+                        onLineUsers.remove(user);  
+                        //listModel.removeElement(username);  
+                    } else if (command.equals("USERLIST")) {// 加载在线用户列表  
+                        int size = Integer  
+                                .parseInt(stringTokenizer.nextToken());  
+                        String username = null;  
+                        String userIp = null;  
+                        for (int i = 0; i < size; i++) {  
+                            username = stringTokenizer.nextToken();  
+                            userIp = stringTokenizer.nextToken();  
+                            Users user = new Users(username, userIp);  
+                            onLineUsers.put(username, user);  
+                            //listModel.addElement(username);  
+                        }  
+                    } else if (command.equals("MAX")) {// 人数已达上限  
+                        textArea.append(stringTokenizer.nextToken()  
+                                + stringTokenizer.nextToken() + "\r\n");  
+                        //closeCon();// 被动的关闭连接  
+                        //JOptionPane.showMessageDialog(frame, "服务器缓冲区已满！", "错误",  JOptionPane.ERROR_MESSAGE);  
+                        return;// 结束线程  
+                    } else {// 普通消息  
+                        textArea.append(message + "\r\n");  
+                    }  
+                } catch (IOException e) {  
+                    e.printStackTrace();  
+                } catch (Exception e) {  
+                    e.printStackTrace();  
+                }  
+            }  
+        }  
+    }  
+    public static void main(String []args)
+    {
+        new LoginClient();
+    }
+}
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.xushihuai.frames;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URL;
+import java.util.StringTokenizer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+
+/**
+ *
+ * @author xushihuai
+ */
+public class Client extends JFrame{
+    private JTextArea jta1;  
+    private JTextField jtfNum,jtfMessage;
+    private JLabel jlNum,jl1,jlWrite;
+    private JButton jbSend,jbExit;  
+    private JPanel upPanel,downPanel;  
+    private JScrollPane leftPanel,rightPanel;  
+    private JSplitPane jsp1;  
+    private JList usersList;  
+    private DefaultListModel listModel;  
+    private JComboBox jcbUsers;
+    private URL imgURL;
+    private String serverIp,userName;
+    
+    //private ServerSocket serverSocket;  
+    //private ServerThread serverThread;  
+    //private ArrayList<ClientThread> clients;  
+    // boolean isStart = false;
+    public Client(String ip,String name) 
+    {
+        serverIp=ip;
+        userName=name;
+        this.setResizable(false);
+        this.setSize(813, 435);
+        this.setTitle(name);
+        imgURL = this.getClass().getResource("/com/xushihuai/images/logo.jpg");
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(imgURL));
+        this.setLocationRelativeTo(null);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        //up
+        upPanel=new JPanel();
+        upPanel.setLayout(null);
+        upPanel.setBackground(new Color(255, 255, 255));
+        upPanel.setBorder(new TitledBorder("Server's information"));   
+        upPanel.setBounds(0,0,807,46);
+        
+
+        jlNum=new JLabel();
+        jlNum.setBounds(new Rectangle(5, 15, 120, 22));
+        jlNum.setText("Online Number");
+        jlNum.setFont(new Font("宋体",0,14));
+        jtfNum = new JTextField();
+        jtfNum.setBounds(new Rectangle(105,15,100,22));
+        jtfNum.setFont(new Font("宋体",0,14));
+        jtfNum.setEditable(false);
+        
+
+        upPanel.add(jtfNum,null);
+
+        upPanel.add(jlNum,null);
+
+        //mid
+        jta1 = new JTextArea();  
+        jta1.setEditable(false);  
+        jta1.setForeground(Color.black);  
+        listModel = new DefaultListModel();  
+        usersList = new JList(listModel);  
+        leftPanel = new JScrollPane(usersList);  
+        leftPanel.setBorder(new TitledBorder("Online Users"));  
+        rightPanel = new JScrollPane(jta1);  
+        rightPanel.setBorder(new TitledBorder("Chatting contents"));  
+        jsp1=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,leftPanel,rightPanel);  
+        jsp1.setDividerLocation(150);  
+        jsp1.setBounds(20, 50,769, 300);
+        //down
+        String list[]={"Everyone"};  
+        downPanel = new JPanel();  
+        downPanel.setLayout(null);  
+        downPanel.setBorder(new TitledBorder("Configuration information"));   
+        downPanel.setBackground(new Color(255, 255, 255));
+        downPanel.setBounds(0,350,807,50);
+
+        jl1=new JLabel();
+        jl1.setText("You are talking to");
+        jl1.setBounds(new Rectangle(5, 15, 150, 22));
+        jl1.setFont(new Font("宋体",0,14));
+        jbSend = new JButton();
+        jbSend.setBounds(new Rectangle(630, 15, 78, 22)); 
+        jbSend.setText("Send");
+        jbExit = new JButton();
+        jbExit.setBounds(new Rectangle(720, 15, 78, 22)); 
+        jbExit.setText("Exit");
+        jcbUsers=new JComboBox(list);
+        jcbUsers.setBounds(150,15,120,22);
+        jcbUsers.setFont(new Font("宋体",0,14));
+        jtfMessage = new JTextField();
+        jtfMessage.setBounds(new Rectangle(335,15,285,22));
+        jtfMessage.setFont(new Font("宋体",0,14));
+        jlWrite=new JLabel();
+        jlWrite.setText("Write");
+        jlWrite.setBounds(new Rectangle(295, 15, 150, 22));
+        jlWrite.setFont(new Font("宋体",0,14));
+        downPanel.add(jl1,null);
+        downPanel.add(jcbUsers,null);
+        downPanel.add(jbSend,null);  
+        downPanel.add(jbExit,null);  
+        downPanel.add(jtfMessage,null);  
+        downPanel.add(jlWrite,null);  
+        
+        this.setLayout(null);  
+        this.add(upPanel);  
+        this.add(jsp1);  
+        this.add(downPanel);  
+        
+        //this.setSize(Toolkit.getDefaultToolkit().getScreenSize());//设置全屏  
+        int screen_width = Toolkit.getDefaultToolkit().getScreenSize().width;  
+        int screen_height = Toolkit.getDefaultToolkit().getScreenSize().height;  
+        this.setLocation((screen_width - this.getWidth()) / 2,(screen_height - this.getHeight()) / 2);  
+        
+        this.setVisible(true);  
+        myEvent();
+    }
+    public void myEvent()
+    {
+        jbExit.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                System.exit(0);
+            }
+            });
+    }
+    public static void main(String []args)
+    {
+        new Client("","");
+    }
+}
