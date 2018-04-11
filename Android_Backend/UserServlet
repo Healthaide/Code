@@ -1,0 +1,104 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.xshbookstore.user.web.servlet;
+
+import cn.itcast.commons.CommonUtils;
+import cn.itcast.servlet.BaseServlet;
+import com.xshbookstore.cart.domain.Cart;
+import com.xshbookstore.user.service.UserException;
+import com.xshbookstore.user.service.UserService;
+import com.xshbookstore.user.domain.User;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ *
+ * @author xushihuai
+ */
+public class UserServlet extends BaseServlet 
+{
+    private UserService userService=new UserService();
+    public String regist(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    {
+        User form=CommonUtils.toBean(request.getParameterMap() ,User.class);
+        form.setUid(CommonUtils.uuid());
+        form.setCode(CommonUtils.uuid()+CommonUtils.uuid());
+        Map<String,String> errors=new HashMap<String,String>();
+        String usernam=form.getUsername();
+        if(usernam==null||usernam.trim().isEmpty())
+        {
+            errors.put("username","用户名不能为空");
+        }
+        else if(usernam.length()<3||usernam.length()>10)
+        {
+            errors.put("username","用户名长度必须在3-10之间");
+        }
+        String password=form.getPassword();
+        if(password==null||password.trim().isEmpty())
+        {
+            errors.put("password","密码不能为空");
+        }
+        else if(password.length()<3||password.length()>10)
+        {
+            errors.put("password","密码长度必须在3-10之间");
+        }
+        String email=form.getEmail();
+        if(email==null||email.trim().isEmpty())
+        {
+            errors.put("email","Email不能为空");
+        }
+       else if(!email.matches("\\w+@\\w+\\.\\w+"))
+       {
+           errors.put("email","Email格式错误");
+       }
+        if(errors.size()>0)
+        {
+            request.setAttribute("errors", errors);
+            request.setAttribute("form", form);
+            return "f:/jsps/user/regist.jsp";
+        }
+        try
+        {
+            userService.regist(form);
+        }
+        catch(UserException e)
+        {
+            request.setAttribute("msg", e.getMessage());
+            request.setAttribute("form", form);
+            return "f:/jsps/user/regist.jsp";
+        }
+
+        request.setAttribute("msg","恭喜，注册成功!");
+        return "f:/jsps/msg.jsp";
+    }
+    public String login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    {
+        User form=CommonUtils.toBean(request.getParameterMap(),User.class);
+        try
+        {
+            User user=userService.login(form);
+            request.getSession().setAttribute("session_user", user);
+            request.getSession().setAttribute("cart",new Cart());
+            return "r:/index.jsp";
+        }
+        catch(UserException e)
+        {
+            request.setAttribute("msg",e.getMessage());
+            request.setAttribute("form",form);
+        }
+        return "f:/jsps/user/login.jsp";//转发
+    }
+    public String quit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    {
+        request.getSession().invalidate();
+        return "r:/index.jsp"; //重定向
+    }
+    
+}
