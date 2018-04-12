@@ -1,11 +1,11 @@
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>健康校园运营管理平台</title>
-    <meta http-equiv="Content-Type" content="text/html" ; charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- jQuery UI -->
     <link href="https://code.jquery.com/ui/1.10.3/themes/redmond/jquery-ui.css" rel="stylesheet" media="screen">
@@ -20,98 +20,201 @@
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
-    <style type="text/css">
-    html,
-    body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    </style>
+    <link rel="stylesheet" href="assets/css/amazeui.min.css" />
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/app.css">
+    <meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+		<link rel="stylesheet" type="text/css" href="<c:url value='/jquery/jquery.datepick.css'/>">
+	<script type="text/javascript" src="<c:url value='/jquery/jquery-1.5.1.js'/>"></script>
+	<script type="text/javascript" src="<c:url value='/jquery/jquery.datepick.js'/>"></script>
+	<script type="text/javascript" src="<c:url value='/jquery/jquery.datepick-zh-CN.js'/>"></script>
+	<script type="text/javascript">
+	$(function() {
+		$("#date").datepick({dateFormat:"yy-mm-dd"});
+	});
+	function add() {
+		$(".error").text("");
+		var bool = true;
+		if(!$(":text[name=name]").val()) {
+			$("#NameError").text("姓名不能为空");
+			bool = false;
+		}
+
+		if(!$(":text[name=hospital]").val()) {
+			$("#hospitalError").text("医院不能为空");
+			bool = false;
+		}
+		if(!$(":text[name=department]").val()) {
+			$("#departmentError").text("部门不能为空");
+			bool = false;
+		}
+		if(!$(":text[name=position]").val()) {
+			$("#positionError").text("职称不能为空");
+			bool = false;
+		}
+		if(!$(":text[name=phone]").val()) {
+			$("#phoneError").text("电话不能为空");
+			bool = false;
+		}
+		if(!$(":text[name=password]").val()) {
+			$("#passwordError").text("密码不能为空");
+			bool = false;
+		}
+		if(bool) {
+			$("form").submit();
+		}
+	}
+	
+</script>
+<style type="text/css">
+	.error {color:red;}
+</style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-5">
-                    <!-- Logo -->
-                    <div class="logo">
-                        <h1><a href="index.html">健康妈妈运营管理平台</a></h1>
-                    </div>
+        <header class="am-topbar am-topbar-inverse admin-header">
+
+        
+            <li class="am-dropdown" data-am-dropdown data-am-dropdown-toggle>
+
+                <span class="tpl-header-list-user-nick"><h1>Administration Center</h1></span>
+
+            </li>
+                
+            <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only" data-am-collapse="{target: '#topbar-collapse'}"><span class="am-sr-only">导航切换</span> <span class="am-icon-bars"></span></button>
+        </header>
+    
+    <div class="tpl-page-container tpl-page-header-fixed">
+            <div class="tpl-left-nav tpl-left-nav-hover">
+                <div class="tpl-left-nav-title">
+                    Administration List
                 </div>
-                <div class="col-md-5">
-                    <div class="row">
-                        <div class="col-lg-12">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="page-content" style="min-height: 100%; height: auto !important; height: 100%;padding-bottom:300px">
-        <div class="row" style="padding-bottom: 65px;">
-            <div class="col-md-2">
-                <div class="sidebar content-box" style="display: block;">
-                    <ul class="nav">
-                        <li><a href="editors.jsp"><i class="glyphicon glyphicon-pencil"></i> 文章发布</a></li>
-                        <li class="current"><a href="<c:url value='/CustomerServlet?method=findAll'/>"><i class="glyphicon glyphicon-heart-empty"></i>文章管理</a></li>
-                        <li><a href="<c:url value='/CustomerServlet?method=findAllc'/>"><i class="glyphicon glyphicon-comment"></i> 反馈信息</a></li>
-                        <li><a href="<c:url value='/CustomerServlet?method=findAlld'/>"><i class="glyphicon glyphicon-heart-empty"></i>医生管理</a></li>
-                        <li class="current"><a href="topic.jsp"><i class="glyphicon glyphicon-tag"></i>话题贴士</a></li>
-                                                <li class="submenu">
-                            <a href="#">
-                                <i class="glyphicon glyphicon-user"></i>管理人员
-                                <span class="caret pull-right"></span>
+                <div class="tpl-left-nav-item">
+                            <a href="editors.jsp" class="nav-link tpl-left-nav-link-list">
+                                <i class="am-icon-pencil-square-o"></i>
+                                <span>Article Publish</span>
                             </a>
-                            <!-- Sub menu -->
-                            <ul>
-                                <li><a href="<c:url value='/CustomerServlet?method=quit'/>">注销</a></li>
+                        </li>
+
+                        <li class="tpl-left-nav-item">
+                            <a href="article_tables.jsp" class="nav-link tpl-left-nav-link-list">
+                                <i class="am-icon-list"></i>
+                                <span>Article Management</span>
+                            </a>
+                        </li>
+
+                        <li class="tpl-left-nav-item">
+                            <a href="comment.jsp" class="nav-link tpl-left-nav-link-list">
+                                <i class="am-icon-comments-o"></i>
+                                <span>Feedback</span>
+                            </a>
+                        </li>
+
+                        <li class="tpl-left-nav-item">
+                            <a href="doctor1.jsp" class="nav-link tpl-left-nav-link-list">
+                                <i class="am-icon-user-md"></i>
+                                <span>Doctor Management</span>
+                            </a>
+
+                        </li>
+
+                        <li class="tpl-left-nav-list">
+                      <ul class="tpl-left-nav-menu">                            
+                            <a href="#" class="nav-link active">
+                                <i class="am-icon-wpforms"></i>
+                                <span>Tip & Topic</span>
+                            </a>
+
+                        </li>
+
+                        <li class="tpl-left-nav-item">
+                            <a href="manager.jsp" class="nav-link tpl-left-nav-link-list">
+                                <i class="am-icon-user"></i>
+                                <span>Manager Management</span>
+                            </a>
+
+                        </li>                   
+
+                        <li class="tpl-left-nav-item">
+                            <a href="javascript:;" class="nav-link tpl-left-nav-link-list">
+                                <i class="am-icon-cog"></i>
+                                <span>Set</span>
+                                <i class="am-icon-angle-right tpl-left-nav-more-ico am-fr am-margin-right"></i>
+                            </a>
+                            <ul class="tpl-left-nav-sub-menu">
+                                <li>
+                                    <a href="set.jsp">
+                                        <i class="am-icon-angle-right"></i>
+                                        <span>Modify password</span>
+                                    </a>
+                                    <a href="login.jsp">
+                                        <i class="am-icon-sign-out"></i>
+                                        <span>Log out</span>
+                                    </a>                                    
+                                </li>
                             </ul>
                         </li>
-                    </ul>
                 </div>
             </div>
+                     
+        <div class="tpl-content-wrapper">     
+            <div class="tpl-content-page-title">
+                    Doctor Management
+                </div>
+                <ol class="am-breadcrumb">
+                    <li><a href="editors.jsp" class="am-icon-home">Home</a></li>
+                    <li><a href="#" class="am-icon-wpforms">Publish Topic</a></li>
+                    <li><a href="tip.jsp" class="am-icon-bookmark">Publish Tip</a></li>
+                </ol>
+                <div class="tpl-portlet-components">
+                    <div class="portlet-title">
+                        <div class="caption font-green bold">
+                             Publish Topic
+                        </div>    
+                    </div> 
+                                        
             <div class="col-md-10">
                 <div class="row">
                     <div class="col-md-12">
                         <div class="content-box-large">
                            <form action="<c:url value='/CustomerServlet'/>" method="post">
-									<input type="hidden" name="method" value="addt"/>
-                            <div class="panel-heading">
-                                <div class="panel-title">话题发布</div>
-                            </div>
-                            
+						
                             <div class="panel-body">
                                 <div id="rootwizard">
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="tab1">
                                             <form class="form-horizontal" role="form">
                                                 <div class="form-group">
-                                                    <label for="inputEmail3" class="col-sm-2 control-label">话题</label>
+                                                    <label for="inputEmail3" class="col-sm-2 control-label">Topic</label>
                                                     <div class="col-sm-4">
-                                                        <input type="text" class="form-control" name="topicname" id="topicname" placeholder="话题">
-                                                    </div>
-                                                    <label for="inputPassword3" class="col-sm-2 control-label">时间</label>
-                                                    <div class="col-sm-4">
-                                                        <input type="text" class="form-control"name="topictime" id="topictime" placeholder="时间">
+                                                        <input type="text" class="form-control" name="topicname" id="topicname" placeholder="Topic">
                                                     </div>
                                                 </div>
+                                                <br><br>
+                                                <div class="form-group">
+                                                    <label for="inputEmail3" class="col-sm-2 control-label">Time</label>
+                                                    <div class="col-sm-4">
+                                                        <input type="text" class="form-control"name="topictime" id="topictime" placeholder="Time">
+                                                    </div>
+                                                </div>
+                                                
+                                                <br>
                                                 <!-- <div class="panel-body">
                                                     <textarea id="ckeditor_full"></textarea>
                                                 </div> -->
                                                 <div class="form-group">
-                                                    <label class="col-sm-2 control-label">话题详情</label>
+                                                    <label for="inputEmail3" class="col-sm-2 control-label">Content</label>
                                                     <div class="col-sm-10">
-                                                        <textarea class="form-control" name="topicarticle"placeholder="话题详情" rows="8"></textarea>
+                                                        <textarea class="form-control" name="topicarticle"placeholder="Content" rows="8"></textarea>
                                                     </div>
                                                 </div>
                                                 <div class="panel-body">
                                                     <p>
-                                                            	<input type="button" value="发布文章"/>
+                                                        <input class="am-btn am-btn-primary" type="button" value="Publish"/>
                                                     </p>
                                                 </div>
                                             </form>
@@ -123,82 +226,35 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="content-box-large">
-                        	 <form action="<c:url value='/CustomerServlet'/>" method="post">
-									<input type="hidden" name="method" value="addm"/>
-                            <div class="panel-heading">
-                                <div class="panel-title">信息推送</div>
-                            </div>
-                            <div class="panel-body">
-                                <div id="rootwizard">
-                                    <div class="tab-content">
-                                        <div class="tab-pane active" id="tab1">
-                                            <form class="form-horizontal" role="form">
-                                                <div class="form-group">
-                                                    <label for="inputEmail3" class="col-sm-2 control-label">地区</label>
-                                                    <div class="col-sm-4">
-                                                        <input type="text" class="form-control" name="messagearea" id="inputEmail3" placeholder="地区">
-                                                    </div>
-                                                    <label for="inputPassword3" class="col-sm-2 control-label">时间</label>
-                                                    <div class="col-sm-4">
-                                                        <input type="text" class="form-control" name="messagetime" id="inputEmail3" placeholder="时间">
-                                                    </div>
-                                                </div>
-                                                <!-- <div class="panel-body">
-                                                    <textarea id="ckeditor_full"></textarea>
-                                                </div> -->
-                                                <div class="form-group">
-                                                    <label class="col-sm-2 control-label">信息详情</label>
-                                                    <div class="col-sm-10">
-                                                        <textarea class="form-control" name="messagearticle" placeholder="信息详情" rows="8"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="panel-body">
-                                                    <p>
-                                                        	<input type="button" value="推送信息"/>
-                                                    </p>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                               </form>
+ 
+                    <div class="portlet-title">
+                        <div class="caption font-green bold">
                         </div>
-                          
-                    </div>
-                
+                        
+                    </div>               
+                                                                        
+
+                                                                        
                 </div>
-               
             </div>
-            
-        </div>
-    </div>
-    <footer style="position: relative; margin-top: -65px; clear:both;">
+             </div>                            
+
+
+    <footer>
         <div class="container">
             <div class="copy text-center">
-                Copyright 2016 <a href='#'>大学</a>
+                Copyright 2014 <a href='#'>大学</a>
             </div>
         </div>
     </footer>
-    <link rel="stylesheet" type="text/css" href="vendors/bootstrap-wysihtml5/src/bootstrap-wysihtml5.css"></link>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery.js"></script> -->
     <!-- jQuery UI -->
     <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="bootstrap/js/bootstrap.min.js"></script>
-    <script src="vendors/bootstrap-wysihtml5/lib/js/wysihtml5-0.3.0.js"></script>
-    <script src="vendors/bootstrap-wysihtml5/src/bootstrap-wysihtml5.js"></script>
-    <script src="vendors/ckeditor/ckeditor.js"></script>
-    <script src="vendors/ckeditor/adapters/jquery.js"></script>
-    <script type="text/javascript" src="vendors/tinymce/js/tinymce/tinymce.min.js"></script>
-    <script src="js/custom.js"></script>
-    <script src="js/editors.js"></script>
     <!-- bootstrap-datetimepicker -->
-    <script src="vendors/form-helpers/js/bootstrap-formhelpers.min.js"></script>
+    <script src="js/custom.js"></script>
 </body>
 
 </html>
