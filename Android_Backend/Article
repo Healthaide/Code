@@ -1,0 +1,72 @@
+package cn.domain.hello.tool;
+
+public class Article {
+	private int id;
+	private String date;
+	private String author;
+	private String url;
+	private String title;
+	private String content;
+	private int click;
+
+	public Article() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public int getID() {
+		return id;
+	}
+
+	public void setID(int ID) {
+		this.id = ID;
+	}
+	
+	public int getClick() {
+		return click;
+	}
+
+	public void setClick(int click) {
+		this.click = click;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String Dep) {
+		this.date = Dep;
+	}
+	
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String Dep) {
+		this.author = Dep;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String Dep) {
+		this.url = Dep;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+}
