@@ -1,0 +1,140 @@
+package cn.domain.hello.dao;
+
+import java.util.*;
+import java.sql.*;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import cn.domain.hello.domain.WritePost;
+import cn.domain.hello.tool.Post;
+import cn.domain.hello.tool.OP;
+
+public class WritePostDao extends BaseDao {
+	public PreparedStatement prepStmt = null;
+	public ResultSet rs = null;
+	public ResultSet rs1 = null;
+	WritePost list = new WritePost();
+
+	public String getTime() {
+		Date date=new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String time=df.format(date);
+		return time;
+	}
+	
+	public WritePost writePost(Post post) {
+		System.out.println("Now write the post into DB.");
+		List l = new ArrayList();
+		
+		try {
+			int id,pid;
+			int opid = post.getOpID();
+			int num = post.getNum();
+			int userid = post.getUserid();
+			String content = post.getContent();
+			String date = getTime();
+			
+			post.setDate(date);
+			System.out.println("the date is"+date);
+			
+			conn = super.openDB();
+			if (conn != null) {
+				String sql = "insert post(opid,num,date,userid,content) values"
+						+ "('"+opid+"','"+num+"','"+date+"','"+userid+"','"+content+"')";
+				prepStmt = conn.prepareStatement(sql);
+				rs = prepStmt.executeQuery();
+				
+				sql = "select id from post where content = '" + content + "' and userid = '"+ userid +"'";
+				prepStmt = conn.prepareStatement(sql);
+				rs = prepStmt.executeQuery();
+				if (rs.next()) {
+					id = rs.getInt(1);
+					post.setID(id);
+					System.out.println("the postid is"+id);
+					if (post.getPID() != 0) {
+						pid = post.getPID();
+						sql = "update post set pid = '"+pid+"' where id = '"+ pid +"'";
+						prepStmt = conn.prepareStatement(sql);
+						rs = prepStmt.executeQuery();
+					}
+				}
+			}	
+			
+			l.add(post);
+			list.setList(l);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (rs1 != null)
+					rs1.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}
+	
+	public WritePost writeOP(OP op) {
+		System.out.println("Now write the op into DB.");
+		List l = new ArrayList();
+		
+		try {
+			int id,pid;
+			int userid = op.getUserid();
+			String title = op.getName();
+			String content = op.getContent();
+			String date = getTime();
+			
+			op.setDate(date);
+			System.out.println("the date is"+date);
+			
+			conn = super.openDB();
+			if (conn != null) {
+				String sql = "insert post(tile,date,userid,content) values"
+						+ "('"+title+"','"+date+"','"+userid+"','"+content+"')";
+				prepStmt = conn.prepareStatement(sql);
+				rs = prepStmt.executeQuery();
+				
+				sql = "select id from post where title = '" + title + "' and userid = '"+ userid +"'";
+				prepStmt = conn.prepareStatement(sql);
+				rs = prepStmt.executeQuery();
+				if (rs.next()) {
+					id = rs.getInt(1);
+					op.setID(id);
+					System.out.println("the postid is"+id);
+				}
+			}	
+			
+			l.add(op);
+			list.setList(l);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (rs1 != null)
+					rs1.close();
+				if (prepStmt != null)
+					prepStmt.close();
+				if (conn != null)
+					conn.close();
+				super.closeDB();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}
+}
