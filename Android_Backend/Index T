@@ -1,0 +1,59 @@
+package cn.domain.hello.tool;
+
+public class IndexT implements Comparable<IndexT> {
+	private int AID, rel, click;
+
+	public IndexT() {
+	}
+
+	public IndexT(String s) {
+		try {
+			String[] a = s.split(":");
+			this.AID = Integer.parseInt(a[0]);
+			this.rel = Integer.parseInt(a[1]);
+			this.click = Integer.parseInt(a[2]);
+		} catch (Exception e) {
+		}
+	}
+
+	public IndexT(int AID, int rel, int click) {
+		this.AID = AID;
+		this.rel = rel;
+		this.click = click;
+	}
+
+	public int getAID() {
+		return AID;
+	}
+
+	public void setAID(int AID) {
+		this.AID = AID;
+	}
+
+	public int getrel() {
+		return rel;
+	}
+
+	public void setrel(int rel) {
+		this.rel = rel;
+	}
+
+	public int getclick() {
+		return click;
+	}
+
+	public void setclick(int click) {
+		this.click = click;
+	}
+
+	public String toString() {
+		return (AID + ":" + rel + ":" + click);
+	}
+
+	public int compareTo(IndexT another) {
+		int i = new Integer(another.rel).compareTo(new Integer(this.rel));
+		i = i == 0 ? new Integer(another.click).compareTo(new Integer(this.click)) : i;
+		return i == 0 ? new Integer(another.AID).compareTo(new Integer(
+				this.AID)) : i;
+	}
+}
