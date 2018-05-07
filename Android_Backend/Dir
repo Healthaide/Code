@@ -1,0 +1,43 @@
+package cn.domain.hello.tool;
+
+public class Dir {
+	private int ID;
+	private String name;
+	private int click;
+
+	public Dir() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Dir(int ID, String name, String date, String source, int click) {
+		super();
+		this.ID = ID;
+		this.name = name;
+		this.click = click;
+	}
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int ID) {
+		this.ID = ID;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getClick() {
+		return click;
+	}
+
+	public void setClick(int click) {
+		this.click = click;
+	}
+}
