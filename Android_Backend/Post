@@ -1,0 +1,100 @@
+package cn.domain.hello.tool;
+
+public class Post {
+	private int id;
+	private int opid;
+	private int pid;
+	private int num;
+	private String date;
+	private int userid;
+	private String content;
+	private String puname;
+	private String pcontent;
+
+	public Post() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Post(int opid, int num, String content, int userid,int pid) {
+		super();
+		this.opid = opid;
+		this.num = num;
+		this.userid = userid;
+		this.content = content;
+		this.pid = pid;
+	}
+
+	public int getID() {
+		return id;
+	}
+
+	public void setID(int ID) {
+		this.id = ID;
+	}
+	
+	public int getOpID() {
+		return opid;
+	}
+
+	public void setOpID(int ID) {
+		this.opid = ID;
+	}
+	
+	public int getPID() {
+		return pid;
+	}
+
+	public void setPID(int ID) {
+		this.pid = ID;
+	}
+	
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(int ID) {
+		this.num = ID;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String Dep) {
+		this.date = Dep;
+	}
+
+	public int getUserid() {
+		return userid;
+	}
+
+	public void setUserid(int userid) {
+		this.userid = userid;
+	}
+	
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String Dep) {
+		this.content = Dep;
+	}
+
+	public String getPuname() {
+		return puname;
+	}
+
+	public void setPuname(String Dep) {
+		this.puname = Dep;
+	}
+
+	public String getPcontent() {
+		return pcontent;
+	}
+
+	public void setPcontent(String Dep) {
+		this.pcontent = Dep;
+	}
+
+}
