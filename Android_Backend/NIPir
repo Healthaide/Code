@@ -1,0 +1,143 @@
+package cn.domain.hello.tool;
+
+import java.io.UnsupportedEncodingException;
+
+import com.sun.jna.*;
+
+public class Nlpir {
+
+	public interface CLibrary extends Library {
+		String classPath = Nlpir.class.getClassLoader().getResource("").getPath();
+		String path = classPath.substring(1) + "Nlpir/NLPIR";
+		
+		CLibrary Instance = (CLibrary) Native.loadLibrary(path,CLibrary.class);
+
+		public int NLPIR_Init(String sDataPath, int encoding,String sLicenceCode);
+
+		public String NLPIR_ParagraphProcess(String sSrc, int bPOSTagged);
+
+		public String NLPIR_GetKeyWords(String sLine, int nMaxKeyLimit,boolean bWeightOut);
+
+		public String NLPIR_GetFileKeyWords(String sLine, int nMaxKeyLimit,
+				boolean bWeightOut);
+
+		public int NLPIR_AddUserWord(String sWord);// add by qp 2008.11.10
+
+		public int NLPIR_DelUsrWord(String sWord);// add by qp 2008.11.10
+
+		public String NLPIR_GetLastErrorMsg();
+
+		public int NLPIR_ImportUserDict(String sFilename, boolean bOverwrite);  
+
+		public void NLPIR_Exit();
+	}
+
+	public static String transString(String aidString, String ori_encoding,
+			String new_encoding) {
+		try {
+			return new String(aidString.getBytes(ori_encoding), new_encoding);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static String segmentation(String searchwords) {
+		String classPath = Nlpir.class.getClassLoader().getResource("").getPath();
+		String argu = classPath.substring(1) + "Nlpir";
+		argu = argu.replace('/','\\');
+		//String UD = classPath.substring(1) + "Nlpir\\userd.txt";
+		//UD = UD.replace('/','\\');
+		// String system_charset = "GBK";//GBK----0
+		//String system_charset = "UTF-8";
+		int charset_type = 1;
+		
+		int init_flag = CLibrary.Instance.NLPIR_Init(argu, charset_type, "0");
+		String nativeBytes = null;
+
+		if (0 == init_flag) {
+			nativeBytes = CLibrary.Instance.NLPIR_GetLastErrorMsg();
+			
+			System.out.print("wrong:");
+			
+			return nativeBytes;
+		}
+
+		// String nativeBytes = null;
+		try {
+			nativeBytes = getkeyword(searchwords);
+
+			CLibrary.Instance.NLPIR_Exit();
+		} catch (Exception ex) {
+			// TODO Auto-generated catch block
+			ex.printStackTrace();
+		}
+
+		return nativeBytes;
+	}
+
+	public static String getkeyword(String searchwords) {
+		String nativeBytes = CLibrary.Instance.NLPIR_ParagraphProcess(
+				searchwords, 1);
+		String str1, str2, str3 = null, keystr;
+		str1 = str2 = keystr = "";
+		boolean checkphr = true;
+
+		try {
+			String[] array = nativeBytes.split(" ");
+			int lena = array.length, lenb;
+
+			for (int n = 0; n < lena; n++) {
+				try {
+					String[] str = array[n].split("/");
+					lenb = str.length - 1;
+					char a = str[lenb].charAt(0);
+
+					System.out.println(str[lenb]);
+					
+					if (str[lenb].equals("ndis")) {
+						str2 = str[0].concat("/ndis");
+						checkphr = false;
+					} else if (str[lenb].equals("ndep")) {
+						str2 = str[0].concat("/ndep");
+						checkphr = false;
+					} else if (str[lenb].equals("nsym")) {
+						str2 = str[0].concat("/nsym");
+						checkphr = false;
+					} else if ('v' == a) {
+						if (!str[lenb].equals("vf")
+								&& !str[lenb].equals("vyou")) {
+							str2 = str1.concat(str[0]);
+							str2 = str2.concat("/nsym");
+							checkphr = false;
+						} else {
+							str3 = str1.concat(str[0]);
+						}
+					} else if ('a' == a && null == str3) {
+						str2 = str1.concat(str[0]);
+						str2 = str2.concat("/nsym");
+						checkphr = false;
+					} else if ('n' == a || 's' == a) {
+						if (null != str3) {
+							str2 = str3.concat(str[0]);
+							str2 = str2.concat("/nsym");
+							checkphr = false;
+							str3 = null;
+						} else {
+							str1 = str[0];
+						}
+					}
+
+					if (false == checkphr) {
+						keystr = keystr.concat(str2.concat("#"));
+						checkphr = true;
+					}
+				} catch (Exception ex) {
+				}
+			}
+		} catch (Exception ex) {
+		}
+
+		return keystr;
+	}
+}
